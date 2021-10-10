@@ -7,7 +7,7 @@ class Status(Enum):
     OTHER = 3
 
     @classmethod
-    def decode(cls, s: str):
+    def decode(cls, status_str: str):
         """
         Decode traffic light GRINT state.
 
@@ -43,11 +43,11 @@ class Status(Enum):
         Detailed documentation:
         http://wiki.itsfactory.fi/images/f/fe/DINT_GRINT_states.pdf
         """
-        if len(s) != 1 or s < '0' or 'J' < s:
-            raise ValueError(f"Invalid traffic light status code: '{s}'")
-        elif s in "?@ABCDEFGH90":  # includes amber after red
+        if len(status_str) != 1 or status_str < '0' or status_str > 'J':
+            raise ValueError(f"Invalid traffic light status code: '{status_str}'")
+        if status_str in "?@ABCDEFGH90":  # includes amber after red
             return Status.RED
-        elif s in "1345678:<>":  # includes amber after green
+        elif status_str in "1345678:<>":  # includes amber after green
             return Status.GREEN
         else:
             return Status.OTHER
