@@ -71,6 +71,7 @@ if [ $py_status -ge 1 ]; then
                                         py_latest=$(python3 --version)
                                         echo "Latest Installed Python version is $py_latest"
                                         sudo update-alternatives --install /usr/local/bin/python3 python /usr/bin/python3.9 1
+                                        sudo update-alternatives --config python3
                                         if [ $? -eq 0 ]; then
                                                 echo "Latest Python version set. It is $(python3 --version)"
                                         fi
