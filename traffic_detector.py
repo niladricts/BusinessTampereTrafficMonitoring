@@ -1,4 +1,4 @@
-import cv2
+
 import argparse
 
 ag = argparse.ArgumentParser()
@@ -9,8 +9,7 @@ ag.add_argument("-v", "--video", required=True,
 args = vars(ag.parse_args())
 
 # OpenCV Python program to detect cars in video frame
-# import libraries of python OpenCV
-
+import cv2
 # capture frames from a video
 cap = cv2.VideoCapture(args["video"])
 
