@@ -19,7 +19,7 @@ if [ $db_exist -eq 1 ]; then
           echo "Database is running. No need to start ...."
      else
             echo "Database is not running. Starting the database...."
-            start_db=`sudo service postgresql start`
+            sudo service postgresql start
             if [ $? -eq 0 ]; then
                  echo "Database started"
             fi
