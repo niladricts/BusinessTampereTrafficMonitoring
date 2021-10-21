@@ -7,8 +7,8 @@ def car_detection():
     """
     Method to detect car objects from the traffic video
     """
-    car_classification = cv2.CascadeClassifier("C:\\Users\\bsens\\Downloads\\haarcascade_car.xml")
-    capt = cv2.VideoCapture("C:\\Users\\bsens\\Downloads\\MVI_6838.mp4")
+    car_classification = cv2.CascadeClassifier("haarcascade_car.xml")
+    capt = cv2.VideoCapture("MVI_6838.mp4")
     # looping through each frame
 
     while True:
