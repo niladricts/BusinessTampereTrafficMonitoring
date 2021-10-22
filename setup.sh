@@ -47,8 +47,7 @@ else
 fi
 
 
-### Create virtual environment, activate it & install required Python packages
+### Create virtual environment & install required Python packages inside
 
 python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt --user
+.venv/bin/pip install -r requirements.txt
