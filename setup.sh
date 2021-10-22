@@ -52,6 +52,6 @@ fi
 
 
 ### Create virtual environment & install required Python packages inside
-
+sudo apt-get install python3.9-venv
 python3 -m venv env
 env/bin/pip install -r requirements.txt
