@@ -43,15 +43,20 @@ if python3 -c 'import sys; exit(sys.version_info.major != 3 or sys.version_info.
 else
     sudo apt install -y software-properties-common -qq
     sudo add-apt-repository -y ppa:deadsnakes/ppa
-    sudo apt install -y python3-pip python3.9 python3.9-venv -qq
+    sudo apt install -y python3-pip python3.9 -qq
     # update-alternatives makes python3 refer to the right Python version and
     # updates the version of Python that pip3 uses
     sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
     echo "Installed Python 3.9."
 fi
-
+py_ver_major=$(python3 -c "import sys; print(sys.version_info.major)")
+py_ver_minor=$(python3 -c "import sys; print(sys.version_info.minor)")
+if [ "$py_ver_major" -eq "3" ] && [ "$py_ver_minor" -ge "9" ]; then
+        py_ver=$py_ver_major.$py_ver_minor
+        echo $py_ver
+fi
 
 ### Create virtual environment & install required Python packages inside
-
+sudo apt-get install python$py_ver-venv
 python3 -m venv env
 env/bin/pip install -r requirements.txt
