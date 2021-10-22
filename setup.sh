@@ -49,9 +49,14 @@ else
     sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
     echo "Installed Python 3.9."
 fi
-
+py_ver_major=$(python3 -c "import sys; print(sys.version_info.major)")
+py_ver_minor=$(python3 -c "import sys; print(sys.version_info.minor)")
+if [ "$py_ver_major" -eq "3" ] && [ "$py_ver_minor" -ge "9" ]; then
+        py_ver=$py_ver_major.$py_ver_minor
+        echo $py_ver
+fi
 
 ### Create virtual environment & install required Python packages inside
-sudo apt-get install python3.9-venv
+sudo apt-get install python$py_ver-venv
 python3 -m venv env
 env/bin/pip install -r requirements.txt
