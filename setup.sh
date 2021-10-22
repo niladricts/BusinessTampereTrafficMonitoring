@@ -1,12 +1,13 @@
 #!/bin/bash
 
-### This shell script is used to setup initial environment during login. This checks whether a psql database is up or not.
-### installed or not. If not, it will start the database or create a new one
-### Checks recent python version. If not upgraded, it upgrades it and set it as default alternative
-### Install required dependencies from requirements.txt
+### This shell script is used to setup environment for the system on a machine running Ubuntu. It:
+###  1. Installs database (if not already installed)
+###  2. Starts the database service (if not already running)
+###  3. Installs Python 3.9 (unless Python 3.9+ is already installed)
+###  4. Creates a virtual environment in .venv directory
+###  5. Installs required Python packages inside that virtual environment
 
-
-### Safer bash scripting, see: https://explainshell.com/explain?cmd=set+-euxo+pipefail
+# Safer bash scripting, see: https://explainshell.com/explain?cmd=set+-euxo+pipefail
 set -euxo pipefail
 
 
@@ -14,27 +15,29 @@ set -euxo pipefail
 sudo apt update -y -qq
 
 
-### Database installation check
+### Database installation
 
 if which psql; then
-     echo "Database is installed. Checking its status..."
-     if sudo service postgresql status; then
-        echo "Database is running. No need to start ...."
-     else
-        echo "Database is not running. Starting the database...."
-        if sudo service postgresql start; then
-            echo "Database started"
-        fi
-     fi
+     echo "Database is already installed."
 else
     echo "Database is not installed. Installing..."
     sudo apt install -y postgresql -qq
 fi
 
 
+### Start database service
+
+if sudo service postgresql status; then
+   echo "Database service is already running."
+else
+   echo "Database is not running. Starting..."
+   sudo service postgresql start
+fi
+
+
 ### Python installation check
 
-echo "Checking python installation"
+echo "Checking python installation..."
 if python3 -c 'import sys; exit(sys.version_info.major != 3 or sys.version_info.minor < 9)'; then
     echo "Python 3.9+ already installed."
 else
@@ -44,6 +47,7 @@ else
     # update-alternatives makes python3 refer to the right Python version and
     # updates the version of Python that pip3 uses
     sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+    echo "Installed Python 3.9."
 fi
 
 
