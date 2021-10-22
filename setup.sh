@@ -53,5 +53,5 @@ fi
 
 ### Create virtual environment & install required Python packages inside
 
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
+python3 -m venv env
+env/bin/pip install -r requirements.txt
