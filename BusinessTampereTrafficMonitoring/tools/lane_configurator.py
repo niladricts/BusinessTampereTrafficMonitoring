@@ -77,8 +77,8 @@ def main():
             infotxt.set("All required lanes have been configured, you can close the window!")
         elif lanes_given:
             point_number = len(points) + 1
-            sg = lanes[polygon_index]
-            infotxt.set(f'Pick point #{point_number} for signal group "{sg}", or right click to finish current polygon')
+            lane = lanes[polygon_index]
+            infotxt.set(f'Pick point #{point_number} for lane "{lane}", or right click to finish current polygon')
         else:
             infotxt.set("Pick points by left clicking the image, right click to finish a shape")
 
