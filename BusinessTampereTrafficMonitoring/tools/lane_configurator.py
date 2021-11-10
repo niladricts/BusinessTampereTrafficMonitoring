@@ -2,9 +2,9 @@ import argparse
 import json
 import tkinter as tk
 
+import geometry
 from PIL import Image
 from PIL import ImageTk
-
 
 PTSIZE = 8
 LINEWIDTH = 2
@@ -12,59 +12,79 @@ COLORS = ["#FF0000", "#FFFF00", "#FF00FF", "#00FFFF", "#00FF00"]
 
 
 def read_args():
-    parser = argparse.ArgumentParser(description="Tool to pick areas of interest (defined by 4 points) from an image",
+    parser = argparse.ArgumentParser(description="Tool to pick areas of interest (defined as polygons) from an image",
                                      formatter_class=argparse.RawDescriptionHelpFormatter,
-                                     epilog="Example usage:\n $ python lane_picker.py image.jpg -s A -s B -s C")
+                                     epilog="Example usage:\n $ python lane_configurator.py image.jpg -L A -L B")
 
     parser.add_argument("image_file")
 
-    parser.add_argument("-s", "--signal-group",
+    parser.add_argument("-L", "--lane",
                         action="append",
-                        help="Signal groups to pick")
+                        help="Lanes to pick")
+
+    parser.add_argument("--intersection-id",
+                        default="UNKNOWN",
+                        help="Intersection id (to be printed in JSON)")
+
+    parser.add_argument("--camera-id",
+                        default="UNKNOWN",
+                        help="Camera id (to be printed in JSON)")
+
+    parser.add_argument("--scale",
+                        type=float,
+                        default=1,
+                        help="Factor to scale the image (coordinates will be translated to the original image size)")
+
+    parser.add_argument("--round", action="store_true", help="Round the final coordinates to nearest integer")
 
     return vars(parser.parse_args())
 
 
-def print_json(sgroups, points):
+def print_json(args, lanes, polygons):
     arr = []
-    for i, sgroup in enumerate(sgroups):
+    for i, lane in enumerate(lanes):
         obj = {}
-        obj["intersection_id"] = "UNKNOWN"
-        obj["camera_id"] = "UNKNOWN"
-        obj["signal_group"] = sgroup
-        obj["vertices"] = points[4*i:4*i+4]
+        obj["intersection_id"] = args["intersection_id"]
+        obj["camera_id"] = args["camera_id"]
+        obj["lane"] = lane
+        obj["vertices"] = polygons[i]
         arr.append(obj)
     print(json.dumps(arr))
 
 
 def main():
     args = read_args()
-    sgroups = args["signal_group"]
-    sgroups_given = len(sgroups) > 0
+    lanes = args["lane"] or []
+    scale = args["scale"] or 1
+    lanes_given = len(lanes) > 0
     points = []
-
-    img = Image.open(args["image_file"])
-    imgw, imgh = img.size
+    polygons = []
+    polygon_index = 0
 
     window = tk.Tk()
     window.title("Configurator 9001")
 
+    img = Image.open(args["image_file"])
+    imgw, imgh = img.size
+    if args["scale"] != 1:
+        img = img.resize((round(imgw * scale), round(imgh * scale)))
+        imgw, imgh = img.size
+
     infotxt = tk.StringVar()
 
     def update_infotxt():
-        if sgroups_given and len(points) >= 4 * len(sgroups):
-            infotxt.set("All required points have been picked, you can close the window!")
-        elif sgroups_given:
-            point_number = len(points) % 4 + 1
-            sg = sgroups[len(points) // 4]
-            infotxt.set(f'Picking point {point_number}/4 for signal group "{sg}"...')
+        if lanes_given and polygon_index >= len(lanes):
+            infotxt.set("All required lanes have been configured, you can close the window!")
+        elif lanes_given:
+            point_number = len(points) + 1
+            sg = lanes[polygon_index]
+            infotxt.set(f'Pick point #{point_number} for signal group "{sg}", or right click to finish current polygon')
         else:
-            infotxt.set("Pick points by clicking the image")
+            infotxt.set("Pick points by left clicking the image, right click to finish a shape")
 
     update_infotxt()
 
-    label = tk.Label(window, textvariable=infotxt)
-    label.pack()
+    tk.Label(window, textvariable=infotxt).pack()
 
     tkimg = ImageTk.PhotoImage(img)
 
@@ -73,30 +93,39 @@ def main():
     canvas.pack()
 
     def onclick(event):
-        points.append((event.x, event.y))
-        d = PTSIZE // 2
-        color_index = (len(points) - 1) // 4
-        color = COLORS[color_index % len(COLORS)]
+        x = event.x
+        y = event.y
+        points.append((x, y))
+        color = COLORS[polygon_index % len(COLORS)]
         kwargs = {"fill": color}
-        canvas.create_oval(event.x - d, event.y - d, event.x + d, event.y + d, **kwargs)
-        if len(points) % 4 == 0:
-            kwargs = {"width": LINEWIDTH, "fill": color}
-            canvas.create_line(*points[-1], *points[-2], **kwargs)
-            canvas.create_line(*points[-1], *points[-3], **kwargs)
-            canvas.create_line(*points[-1], *points[-4], **kwargs)
-            canvas.create_line(*points[-2], *points[-3], **kwargs)
-            canvas.create_line(*points[-2], *points[-4], **kwargs)
-            canvas.create_line(*points[-3], *points[-4], **kwargs)
+        d = PTSIZE // 2
+        canvas.create_oval(x - d, y - d, x + d, y + d, **kwargs)
+        update_infotxt()
+
+    def finish_polygon(event):
+        nonlocal polygon_index, points
+        hull = geometry.convex_hull(points)
+        kwargs = {"width": LINEWIDTH, "fill": COLORS[polygon_index % len(COLORS)]}
+        for (x0, y0), (x1, y1) in zip(hull, hull[1:] + hull[0:1]):
+            canvas.create_line(x0, y0, x1, y1, **kwargs)
+        polygon_index += 1
+        if args["round"]:
+            polygons.append([(round(x / scale), round(y / scale)) for x, y in hull])
+        else:
+            polygons.append([(x / scale, y / scale) for x, y in hull])
+        points = []
         update_infotxt()
 
     canvas.bind("<Button-1>", onclick)
+    canvas.bind("<Button-3>", finish_polygon)
 
     window.mainloop()
 
-    if sgroups_given:
-        print_json(sgroups, points)
+    if lanes_given:
+        print_json(args, lanes, polygons)
     else:
-        print(points)
+        for points in polygons:
+            print(points)
 
     return 0
 
