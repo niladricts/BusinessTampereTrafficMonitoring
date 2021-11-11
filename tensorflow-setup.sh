@@ -30,11 +30,6 @@ if ! dpkg -l libcudnn8; then
         cuda-11-2 \
         libcudnn8=${cudnn_version}-1+cuda11.2 -qq \
         libcudnn8-dev=${cudnn_version}-1+cuda11.2 -qq
-
-    # post-installation steps
-    export PATH=/usr/local/cuda-11.2/bin${PATH:+:${PATH}}
-    export LD_LIBRARY_PATH=/usr/local/cuda-11.2/lib64\
-                         ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 fi
 
 
@@ -62,5 +57,5 @@ if ! test -f yolov4.h5; then
     # activate virtual environment to have access to convert-darknet-weights
     source env/bin/activate
     # convert weights to tensorflow format
-    convert-darknet-weights -o yolov4.h5
+    convert-darknet-weights yolov4.weights -o yolov4.h5
 fi
