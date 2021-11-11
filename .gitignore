@@ -14,3 +14,7 @@ venv.bak/
 
 # Editor settings
 .vscode/
+
+# Training model weights
+yolov4.weights
+yolov4.h5
