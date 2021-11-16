@@ -1,15 +1,14 @@
-# project course 2021
-# sending data from object detector to Wapice IoT ticket
-# settings to be refactored as environment variables?
+import os
 import time
 
 from iotticket.client import Client
 from iotticket.models import datanodesvalue
-settings = {
-    "password": "Perkele1",
-    "username": "JARI.RAUHALA@TAMPERE-TEST",
-    "baseUrl": "https://tampere-test.iot-ticket.com/api/v1/"
-}
+
+# Read username and password from environment variables
+IOT_TICKET_USER = os.environ["IOT_TICKET_USERNAME"]
+IOT_TICKET_PASS = os.environ["IOT_TICKET_PASSWORD"]
+IOT_TICKET_URL = os.environ.get("IOT_TICKET_URL",
+                                default="https://tampere-test.iot-ticket.com/api/v1/")
 
 
 # the ids are defined in the IoT Ticket
@@ -26,12 +25,7 @@ deviceIds = {
 #   timestamp: unix time,  time of the event,
 #   deviceId:  string,     unique camera identifier, defined in iot ticket
 def sendDataToUI(name, value, timestamp, deviceId, unit='c'):
-    username = settings["username"]
-    password = settings["password"]
-    baseurl = settings["baseUrl"]
-
-    c = Client(baseurl, username, password)
-    listofvalues = []
+    client = Client(IOT_TICKET_URL, IOT_TICKET_USER, IOT_TICKET_PASS)
 
     nv = datanodesvalue()
     nv.set_name(name)  # needed for writing datanode
@@ -40,13 +34,9 @@ def sendDataToUI(name, value, timestamp, deviceId, unit='c'):
     nv.set_timestamp(timestamp)
     nv.set_unit(unit)
 
-    listofvalues.append(nv)
-
-    print(c.writedata(deviceId, nv))
-    print("END WRITE DEVICE DATANODES FUNCTION")
-    print("-------------------------------------------------------\n")
+    print(client.writedata(deviceId, nv))
 
 
 # use case:
-time = time.time()
-sendDataToUI("1", 44, time, deviceIds[1])
+t = time.time()
+sendDataToUI("1", 44, t, deviceIds[1])
