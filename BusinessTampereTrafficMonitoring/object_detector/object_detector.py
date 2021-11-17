@@ -3,7 +3,6 @@ import time
 from collections import deque
 
 import cv2
-import dateutil.parser as dp
 import numpy as np
 from tf2_yolov4.anchors import YOLOV4_ANCHORS
 from tf2_yolov4.model import YOLOv4
@@ -34,14 +33,6 @@ def find_nearest(array, value):
     return array[idx]
 
 
-def iso_to_unix(iso_time):
-    """
-    Utility function for converting ISO-8601-formatted timestamp to UNIX time
-    """
-    parsed_t = dp.parse(iso_time)
-    return parsed_t.strftime('%s')
-
-
 def get_frame(timestamp=time.time()):
     return cache[find_nearest(timestamps, timestamp)]
 
@@ -56,7 +47,7 @@ def lower_center_from_bbox(bbox):
     return tuple((bbox[0]+bbox[2]) / 2, bbox[1])
 
 
-def detect_by_lane_and_time(intersection, lane, ISO_timestamp, light_status):
+def detect_by_lane_and_time(intersection, lane, epoch_time, light_status):
     """
     The bread and butter of the program:
         Function which can be called from the traffic lights API.
@@ -64,7 +55,6 @@ def detect_by_lane_and_time(intersection, lane, ISO_timestamp, light_status):
         Calls necessary utility functions to transform given parameters to usable formats.
         Does operations on the frames to extract vehicle counts per lane and stores the count, timestamp and lane.
     """
-    epoch_time = iso_to_unix(ISO_timestamp)
     frame_at_the_time = get_frame(epoch_time)
     prediction_frame = np.expand_dims(frame_at_the_time, axis=0) / 255.0
     boxes, scores, classes, detections = model.predict(prediction_frame)
