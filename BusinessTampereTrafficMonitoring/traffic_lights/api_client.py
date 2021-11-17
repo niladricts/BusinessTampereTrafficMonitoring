@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+from typing import Callable
 from typing import List
 
 import httpx
@@ -101,6 +102,39 @@ class TrafficLightAPIClient:
             # store all completed cycles in database
             self.store(events)
             time.sleep(interval)
+
+    def listen_for_light_change_events(self, interval: float, callback: Callable):
+        """
+        Calls the callback function every time a light changes state from green to
+        red or red to green.
+
+        This method never returns unless another thread calls stop_polling().
+        It is intended to be called in a new thread.
+        """
+        if interval <= 0:
+            raise ValueError("Polling interval has to be greater than zero")
+        self.active = True
+        while self.active:
+            for device in self.monitored_devices:
+                resp = httpx.get(f"{self.url}{device}")
+                if resp.status_code != httpx.codes.OK:
+                    print(f"[traffic_lights] Error fetching data: HTTP {resp.status_code}", flush=True)
+                    return
+                obj = resp.json()
+                timestamp = obj["timestamp"]
+                device = obj["device"]
+
+                for sgroup in obj["signalGroup"]:
+                    sg = (device, sgroup["name"])
+                    status = sgroup["status"]
+                    if sg not in self.__signal_groups:
+                        self.__signal_groups[sg] = SignalGroup(*sg, timestamp, status)
+                    else:
+                        old_status = self.__signal_groups[sg].status
+                        self.__signal_groups[sg].update_state(timestamp, status)
+                        new_status = self.__signal_groups[sg].status
+                        if old_status != new_status:
+                            callback(device, sgroup["name"], timestamp, new_status)
 
     def stop_polling(self):
         if self.active:
