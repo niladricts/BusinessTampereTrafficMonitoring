@@ -1,14 +1,14 @@
+import json
 import time
 from collections import deque
 
 import cv2
 import dateutil.parser as dp
 import numpy as np
-import json
 from tf2_yolov4.anchors import YOLOV4_ANCHORS
 from tf2_yolov4.model import YOLOv4
 
-from BusinessTampereTrafficMonitoring.tools.geometry import point_inside
+# from BusinessTampereTrafficMonitoring.tools.geometry import point_inside
 
 
 def store_frame(time, frame):
@@ -74,15 +74,12 @@ def detect_by_lane_and_time(intersection, lane, ISO_timestamp, light_status):
     classes = classes[0].astype(int)
 
     boxes, scores, classes = filter(filter_by_class, zip(boxes, scores, classes))
-    points = [lower_center_from_bbox(item) for item in boxes]
+    # points = [lower_center_from_bbox(item) for item in boxes]
     # vehicle_count = #needs implementing
-
-
-
-
 
     # TODO: Lane matching and updating database or cache with timestamp, lane and vehicle count
     # data = '{"lane_id" : lane, "traffic_time" : epoch_time, "car_amount" : vehicle_count }
+
 
 def stream_reader(cap):
     """
@@ -107,6 +104,9 @@ cap = cv2.VideoCapture('rtsp://rtsp.kvt.tampere.fi:55489/proxyStream')
 if not cap.isOpened():
     print('Cannot open stream')
     exit(-1)
+
+with open("../config.json", "r") as configfile:
+    CONFIG = json.load(configfile)
 
 # Initializing required constants
 ALLOWED_CLASSES = [1, 2, 3, 5, 7]
