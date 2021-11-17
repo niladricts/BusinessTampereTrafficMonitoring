@@ -135,7 +135,8 @@ class ObjectDetector:
         Function for reading frames from the stream, runs all the time. Does no operations on the frames.
         """
         while True:
-            _, frame = self.cap.read()
-            timestamp = time.time()
-            self.store_frame(timestamp, frame)
-            time.sleep(0.01)
+            success, frame = self.cap.read()
+            if success:
+                self.store_frame(time.time(), frame)
+            else:
+                time.sleep(0.01)
