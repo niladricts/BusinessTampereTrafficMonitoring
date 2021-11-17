@@ -1,0 +1,56 @@
+{
+  "lanes": [
+    {
+      "intersection_id": "TRE401",
+      "camera_id": "92311e32ea3f4619ac69df3c95c3ef0a",
+      "signal_groups": ["H", "B"],
+      "lane": "Lane1",
+      "vertices": [
+        [1257, 174],
+        [1365, 173],
+        [1535, 401],
+        [1273, 404]
+      ]
+    },
+    {
+      "intersection_id": "TRE401",
+      "camera_id": "92311e32ea3f4619ac69df3c95c3ef0a",
+      "signal_groups": ["B"],
+      "lane": "Lane2",
+      "vertices": [
+        [1366, 174],
+        [1462, 178],
+        [1767, 397],
+        [1538, 403]
+      ]
+    },
+    {
+      "intersection_id": "TRE401",
+      "camera_id": "92311e32ea3f4619ac69df3c95c3ef0a",
+      "signal_groups": ["D"],
+      "lane": "Lane3",
+      "vertices": [
+        [1476, 187],
+        [1610, 201],
+        [1964, 381],
+        [1983, 404],
+        [1769, 397]
+      ]
+    },
+    {
+      "intersection_id": "TRE401",
+      "camera_id": "92311e32ea3f4619ac69df3c95c3ef0a",
+      "signal_groups": ["D"],
+      "lane": "Lane4",
+      "vertices": [
+        [1613, 201],
+        [1653, 181],
+        [1676, 188],
+        [1823, 246],
+        [2003, 324],
+        [2185, 416],
+        [2013, 416]
+      ]
+    }
+  ]
+}
