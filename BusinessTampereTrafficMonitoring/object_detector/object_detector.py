@@ -110,6 +110,8 @@ class ObjectDetector:
             if cls in ALLOWED_CLASSES:
                 points.append(lower_center_from_bbox(box))
 
+        for lane in lanes:
+            lane["cars"] = 0
         # Count detected cars by lane
         # TODO: this can be optimized
         for point in points:
@@ -118,12 +120,12 @@ class ObjectDetector:
                 # that are read from json are lists
                 vertices = [tuple(xy) for xy in lane["vertices"]]
                 if point_inside(point, vertices):
-                    lane["cars"] = lane.get("cars", 0) + 1
+                    lane["cars"] += 1
                     break
 
         for lane in lanes:
             lane_id = lane["lane"]
-            cars = lane.get("cars", 0)
+            cars = lane["cars"]
             print(f"[{datetime.fromtimestamp(epoch_time):%H:%M:%S}] {cars} cars detected on lane {lane_id}")
         # vehicle_count = #needs implementing
 
