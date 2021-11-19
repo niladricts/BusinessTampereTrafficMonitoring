@@ -1,5 +1,4 @@
 import os
-import time
 
 from iotticket.client import Client
 from iotticket.models import datanodesvalue
@@ -34,9 +33,10 @@ def sendDataToUI(name, value, timestamp, deviceId, unit='c'):
     nv.set_timestamp(timestamp)
     nv.set_unit(unit)
 
-    print(client.writedata(deviceId, nv))
+    response = client.writedata(deviceId, nv)
+    print(response)
 
 
 # use case:
-t = time.time()
-sendDataToUI("1", 44, t, deviceIds[1])
+# t = time.time()
+# sendDataToUI("1", 44, t, deviceIds[1])
