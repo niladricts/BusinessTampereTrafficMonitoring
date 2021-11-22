@@ -1,6 +1,6 @@
 import os
 
-from iotticket.client import Client
+import iotticket.client
 from iotticket.models import datanodesvalue
 
 # Read username and password from environment variables
@@ -10,33 +10,41 @@ IOT_TICKET_URL = os.environ.get("IOT_TICKET_URL",
                                 default="https://tampere-test.iot-ticket.com/api/v1/")
 
 
-# the ids are defined in the IoT Ticket
-deviceIds = {
-    1: "92311e32ea3f4619ac69df3c95c3ef0a",
-    2: "2cb0a25295a34cd698fc009ae4e5b933",
-    3: "ed345735237d423da8ca58468a88c58c"
-}
+class Client(iotticket.client.Client):
+    def __init__(self, *args, **kwargs):
+        iotticket.client.Client.__init__(self, *args, **kwargs)
+
+    def post_car_count(self, *, device_id: str, lane: str, count: int, timestamp: float):
+        """
+        Send a measurement result to IoT Ticket.
+
+        Required keyword arguments:
+        ===========================
+        device_id:  Device ID for the camera (defined in IoT Ticket)
+        lane:       Lane ID ("Data tag" name in IoT Ticket)
+        count:      Number of cars on the lane at the given moment
+        timestamp:  Unix timestamp in seconds (when the cars were counted)
+
+        Usage example:
+        ==============
+        client.post_car_count(
+            device_id="92311e32ea3f4619ac69df3c95c3ef0a",
+            lane="Lane1",
+            count=12,
+            timestamp=time.time())
+        """
+
+        time_ms = int(1000 * timestamp)
+        nv = datanodesvalue(name=lane, dataType="long", ts=time_ms, v=count, unit="cars")
+
+        # The writedata function from iotticket.client.Client is a bit weird,
+        # it can return either:
+        # - string "All datanodes are not valid"
+        # - object representing the response
+        # or it can raise an exception on network error
+        response = client.writedata(device_id, nv)
+
+        print(response)
 
 
-# params:
-#   name:      string,     "Data tag"
-#   value:     int,        number of cars
-#   timestamp: unix time,  time of the event,
-#   deviceId:  string,     unique camera identifier, defined in iot ticket
-def sendDataToUI(name, value, timestamp, deviceId, unit='c'):
-    client = Client(IOT_TICKET_URL, IOT_TICKET_USER, IOT_TICKET_PASS)
-
-    nv = datanodesvalue()
-    nv.set_name(name)  # needed for writing datanode
-    nv.set_dataType("long")
-    nv.set_value(value)  # needed for writing datanode
-    nv.set_timestamp(timestamp)
-    nv.set_unit(unit)
-
-    response = client.writedata(deviceId, nv)
-    print(response)
-
-
-# use case:
-# t = time.time()
-# sendDataToUI("1", 44, t, deviceIds[1])
+client = Client(IOT_TICKET_URL, IOT_TICKET_USER, IOT_TICKET_PASS)
