@@ -1,4 +1,5 @@
 import os
+import sys
 
 import iotticket.client
 from iotticket.models import datanodesvalue
@@ -42,9 +43,10 @@ class Client(iotticket.client.Client):
         # - string "All datanodes are not valid"
         # - object representing the response
         # or it can raise an exception on network error
-        response = client.writedata(device_id, nv)
-
-        print(response)
+        try:
+            client.writedata(device_id, nv)
+        except Exception as err:
+            print(f"[IoT Ticket Client] Failed to write data: {err}", file=sys.stderr)
 
 
 client = Client(IOT_TICKET_URL, IOT_TICKET_USER, IOT_TICKET_PASS)
