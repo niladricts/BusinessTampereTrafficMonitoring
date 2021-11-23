@@ -9,7 +9,7 @@ from tf2_yolov4.model import YOLOv4
 
 from BusinessTampereTrafficMonitoring.tools.geometry import point_inside
 from BusinessTampereTrafficMonitoring.traffic_lights.status import Status
-
+import BusinessTampereTrafficMonitoring.iot_ticket.client as iot
 
 ALLOWED_CLASSES = [1, 2, 3, 5, 7]
 
@@ -36,6 +36,7 @@ class ObjectDetector:
         self.timestamps = deque([])
 
         self.cap = cv2.VideoCapture(video_location)
+
 
         if not self.cap.isOpened():
             print('Cannot open stream')
@@ -127,6 +128,8 @@ class ObjectDetector:
             lane_id = lane["lane"]
             cars = lane["cars"]
             print(f"[{datetime.fromtimestamp(epoch_time):%H:%M:%S}] {cars} cars detected on lane {lane_id}")
+            iot.client.post_car_count('92311e32ea3f4619ac69df3c95c3ef0a', lane_id, cars, epoch_time)
+
         # vehicle_count = #needs implementing
 
         # TODO: Lane matching and updating database or cache with timestamp, lane and vehicle count
@@ -137,8 +140,9 @@ class ObjectDetector:
         Function for reading frames from the stream, runs all the time. Does no operations on the frames.
         """
         while True:
-            success, frame = self.cap.read()
-            if success:
-                self.store_frame(time.time(), frame)
-            else:
-                time.sleep(0.01)
+            success = False;
+            while success != True:
+                success, frame = self.cap.read()
+                time.sleep(0.1)
+            self.store_frame(time.time(), frame)
+            time.sleep(1)
