@@ -139,9 +139,9 @@ class ObjectDetector:
             vehicle_count += cars
 
         # TODO: put this behind a flag or something
-        self.save_image_for_debugging(frame_at_the_time, vehicle_count, boxes, points, epoch_time)
+        self.save_image_for_debugging(frame_at_the_time, sgroup, vehicle_count, boxes, points, epoch_time)
 
-    def save_image_for_debugging(self, img, vehicle_count, boxes, detections, timestamp):
+    def save_image_for_debugging(self, img, sgroup, vehicle_count, boxes, detections, timestamp):
         directory = os.path.abspath("./frames")
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -150,7 +150,10 @@ class ObjectDetector:
         for lane in lanes:
             vertices = [tuple(xy) for xy in lane["vertices"]]
             color = (255, 0, 255)  # in BGR (not RGB)
-            thickness = 3
+            if sgroup in lane["signal_groups"]:
+                thickness = 3
+            else:
+                thickness = 1
             for start_point, end_point in zip(vertices, vertices[1:] + [vertices[0]]):
                 img = cv2.line(img, start_point, end_point, color, thickness)
 
@@ -178,9 +181,14 @@ class ObjectDetector:
         """
         Function for reading frames from the stream, runs all the time. Does no operations on the frames.
         """
+        latest_frame = 0.0
         while True:
-            success = False
-            while not success:
-                success, frame = self.cap.read()
-            self.store_frame(time.time(), frame)
-            time.sleep(1)
+            success, frame = self.cap.read()
+            if success:
+                t = time.time()
+                # only periodically store frames
+                if t - latest_frame >= 0.5:
+                    self.store_frame(t, frame)
+                    latest_frame = t
+            else:
+                time.sleep(0.01)
