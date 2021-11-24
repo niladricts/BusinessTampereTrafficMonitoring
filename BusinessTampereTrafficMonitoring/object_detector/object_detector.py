@@ -143,6 +143,5 @@ class ObjectDetector:
             success = False;
             while not success:
                 success, frame = self.cap.read()
-                time.sleep(0.1)
             self.store_frame(time.time(), frame)
             time.sleep(1)
