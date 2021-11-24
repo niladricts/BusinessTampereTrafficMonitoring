@@ -38,12 +38,12 @@ class ObjectDetector:
         self.timestamps = deque([])
 
         self.cap = cv2.VideoCapture(video_location)
-        if not self.cap.getExceptionMode():
-            self.cap.setExceptionMode(True);
 
         if not self.cap.isOpened():
             print('Cannot open stream')
             exit(-1)
+        if not self.cap.getExceptionMode():
+            self.cap.setExceptionMode(True);
 
         # Initializing required constants
         self.WIDTH = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
