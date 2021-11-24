@@ -12,6 +12,7 @@ from BusinessTampereTrafficMonitoring.tools.geometry import point_inside
 from BusinessTampereTrafficMonitoring.traffic_lights.status import Status
 import BusinessTampereTrafficMonitoring.iot_ticket.client as iot
 
+
 ALLOWED_CLASSES = [1, 2, 3, 5, 7]
 
 
@@ -112,6 +113,7 @@ class ObjectDetector:
             if cls in ALLOWED_CLASSES:
                 points.append(lower_center_from_bbox(box))
 
+
         for lane in lanes:
             lane["cars"] = 0
         # Count detected cars by lane
@@ -125,15 +127,19 @@ class ObjectDetector:
                     lane["cars"] += 1
                     break
 
+        vehicle_count = 0
         for lane in lanes:
             lane_id = lane["lane"]
             cars = lane["cars"]
             print(f"[{datetime.fromtimestamp(epoch_time):%H:%M:%S}] {cars} cars detected on lane {lane_id}")
             iot.client.post_car_count('92311e32ea3f4619ac69df3c95c3ef0a', lane_id, cars, epoch_time)
+            vehicle_count += cars
+
 
         file_name = f"{datetime.fromtimestamp(epoch_time):%H-%M-%S}-{vehicle_count}_vehicles_on_lanes.jpg"
         directory = os.path.abspath("./frames")
         cv2.imwrite(directory, file_name)
+
 
     def read_stream(self):
         """
