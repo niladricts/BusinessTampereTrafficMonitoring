@@ -138,9 +138,35 @@ class ObjectDetector:
                 timestamp=epoch_time)
             vehicle_count += cars
 
-        file_name = f"{datetime.fromtimestamp(epoch_time):%H-%M-%S}-{vehicle_count}_vehicles_on_lanes.jpg"
+        # TODO: put this behind a flag or something
+        self.save_image_for_debugging(frame_at_the_time, vehicle_count, points, epoch_time)
+
+    def save_image_for_debugging(self, img, vehicle_count, detections, timestamp):
         directory = os.path.abspath("./frames")
-        cv2.imwrite(directory, file_name)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        lanes = self.config["lanes"]
+        for lane in lanes:
+            vertices = [tuple(xy) for xy in lane["vertices"]]
+            color = (255, 0, 255)  # in BGR (not RGB)
+            thickness = 3
+            for start_point, end_point in zip(vertices, vertices[1:] + [vertices[0]]):
+                img = cv2.line(img, start_point, end_point, color, thickness)
+
+        radius = 20
+        color = (0, 0, 255)  # in BGR (not RGB)
+        for x, y in detections:
+            center = (round(x), round(y))
+            img = cv2.circle(img, center, radius, color, 3)
+
+        file_name = f"{datetime.fromtimestamp(timestamp):%H%M%S}-{vehicle_count}_vehicles_on_lanes.jpg"
+        file_path = os.path.join(directory, file_name)
+
+        if cv2.imwrite(file_path, img):
+            print(f"Saved detections to {file_path}")
+        else:
+            print(f"Failed to save file {file_path}")
 
     def read_stream(self):
         """
