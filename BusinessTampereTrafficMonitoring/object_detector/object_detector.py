@@ -1,4 +1,5 @@
 import time
+import os
 from collections import deque
 from datetime import datetime
 
@@ -130,10 +131,9 @@ class ObjectDetector:
             print(f"[{datetime.fromtimestamp(epoch_time):%H:%M:%S}] {cars} cars detected on lane {lane_id}")
             iot.client.post_car_count('92311e32ea3f4619ac69df3c95c3ef0a', lane_id, cars, epoch_time)
 
-        # vehicle_count = #needs implementing
-
-        # TODO: Lane matching and updating database or cache with timestamp, lane and vehicle count
-        # data = '{"lane_id" : lane, "traffic_time" : epoch_time, "car_amount" : vehicle_count }
+        file_name = f"{datetime.fromtimestamp(epoch_time):%H-%M-%S}-{vehicle_count}_vehicles_on_lanes.jpg"
+        directory = os.path.abspath("./frames")
+        cv2.imwrite(directory, file_name)
 
     def read_stream(self):
         """
