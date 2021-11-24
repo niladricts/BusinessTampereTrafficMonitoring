@@ -17,7 +17,7 @@ ALLOWED_CLASSES = [1, 2, 3, 5, 7]
 
 
 def lower_center_from_bbox(bbox):
-    return ((bbox[0]+bbox[2]) / 2, bbox[1])
+    return ((bbox[0]+bbox[2]) / 2, bbox[3])
 
 
 def find_nearest(array, value):
