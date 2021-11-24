@@ -177,13 +177,20 @@ class ObjectDetector:
         else:
             print(f"Failed to save file {file_path}")
 
+    def read_with_exception_handling(self):
+        try:
+            return self.cap.read()
+        except Exception as e:
+            print("Unexpected error happened during cap.read(), ignoring this frame. More info: ", e)
+            return False, None
+
     def read_stream(self):
         """
         Function for reading frames from the stream, runs all the time. Does no operations on the frames.
         """
         latest_frame = 0.0
         while True:
-            success, frame = self.cap.read()
+            success, frame = self.read_with_exception_handling();
             if success:
                 t = time.time()
                 # only periodically store frames
