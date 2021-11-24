@@ -139,9 +139,9 @@ class ObjectDetector:
             vehicle_count += cars
 
         # TODO: put this behind a flag or something
-        self.save_image_for_debugging(frame_at_the_time, vehicle_count, points, epoch_time)
+        self.save_image_for_debugging(frame_at_the_time, vehicle_count, boxes, points, epoch_time)
 
-    def save_image_for_debugging(self, img, vehicle_count, detections, timestamp):
+    def save_image_for_debugging(self, img, vehicle_count, boxes, detections, timestamp):
         directory = os.path.abspath("./frames")
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -154,7 +154,13 @@ class ObjectDetector:
             for start_point, end_point in zip(vertices, vertices[1:] + [vertices[0]]):
                 img = cv2.line(img, start_point, end_point, color, thickness)
 
-        radius = 20
+        color = (0, 255, 255)  # in BGR (not RGB)
+        for x0, y0, x1, y1 in boxes:
+            start_point = (round(x0), round(y0))
+            end_point = (round(x1), round(y1))
+            img = cv2.rectangle(img, start_point, end_point, color, 2)
+
+        radius = 6
         color = (0, 0, 255)  # in BGR (not RGB)
         for x, y in detections:
             center = (round(x), round(y))
