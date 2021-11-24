@@ -1,3 +1,4 @@
+import os
 import time
 from collections import deque
 from datetime import datetime
@@ -7,6 +8,7 @@ import numpy as np
 from tf2_yolov4.anchors import YOLOV4_ANCHORS
 from tf2_yolov4.model import YOLOv4
 
+from BusinessTampereTrafficMonitoring.iot_ticket.client import client as iot_client
 from BusinessTampereTrafficMonitoring.tools.geometry import point_inside
 from BusinessTampereTrafficMonitoring.traffic_lights.status import Status
 
@@ -15,7 +17,7 @@ ALLOWED_CLASSES = [1, 2, 3, 5, 7]
 
 
 def lower_center_from_bbox(bbox):
-    return ((bbox[0]+bbox[2]) / 2, bbox[1])
+    return ((bbox[0]+bbox[2]) / 2, bbox[3])
 
 
 def find_nearest(array, value):
@@ -110,6 +112,8 @@ class ObjectDetector:
             if cls in ALLOWED_CLASSES:
                 points.append(lower_center_from_bbox(box))
 
+        for lane in lanes:
+            lane["cars"] = 0
         # Count detected cars by lane
         # TODO: this can be optimized
         for point in points:
@@ -118,25 +122,65 @@ class ObjectDetector:
                 # that are read from json are lists
                 vertices = [tuple(xy) for xy in lane["vertices"]]
                 if point_inside(point, vertices):
-                    lane["cars"] = lane.get("cars", 0) + 1
+                    lane["cars"] += 1
                     break
 
+        vehicle_count = 0
         for lane in lanes:
             lane_id = lane["lane"]
-            cars = lane.get("cars", 0)
+            cars = lane["cars"]
+            device_id = lane["camera_id"]
             print(f"[{datetime.fromtimestamp(epoch_time):%H:%M:%S}] {cars} cars detected on lane {lane_id}")
-        # vehicle_count = #needs implementing
+            iot_client.post_car_count(
+                device_id=device_id,
+                lane=lane_id,
+                count=cars,
+                timestamp=epoch_time)
+            vehicle_count += cars
 
-        # TODO: Lane matching and updating database or cache with timestamp, lane and vehicle count
-        # data = '{"lane_id" : lane, "traffic_time" : epoch_time, "car_amount" : vehicle_count }
+        # TODO: put this behind a flag or something
+        self.save_image_for_debugging(frame_at_the_time, vehicle_count, boxes, points, epoch_time)
+
+    def save_image_for_debugging(self, img, vehicle_count, boxes, detections, timestamp):
+        directory = os.path.abspath("./frames")
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        lanes = self.config["lanes"]
+        for lane in lanes:
+            vertices = [tuple(xy) for xy in lane["vertices"]]
+            color = (255, 0, 255)  # in BGR (not RGB)
+            thickness = 3
+            for start_point, end_point in zip(vertices, vertices[1:] + [vertices[0]]):
+                img = cv2.line(img, start_point, end_point, color, thickness)
+
+        color = (0, 255, 255)  # in BGR (not RGB)
+        for x0, y0, x1, y1 in boxes:
+            start_point = (round(x0), round(y0))
+            end_point = (round(x1), round(y1))
+            img = cv2.rectangle(img, start_point, end_point, color, 2)
+
+        radius = 6
+        color = (0, 0, 255)  # in BGR (not RGB)
+        for x, y in detections:
+            center = (round(x), round(y))
+            img = cv2.circle(img, center, radius, color, 3)
+
+        file_name = f"{datetime.fromtimestamp(timestamp):%H%M%S}-{vehicle_count}_vehicles_on_lanes.jpg"
+        file_path = os.path.join(directory, file_name)
+
+        if cv2.imwrite(file_path, img):
+            print(f"Saved detections to {file_path}")
+        else:
+            print(f"Failed to save file {file_path}")
 
     def read_stream(self):
         """
         Function for reading frames from the stream, runs all the time. Does no operations on the frames.
         """
         while True:
-            success, frame = self.cap.read()
-            if success:
-                self.store_frame(time.time(), frame)
-            else:
-                time.sleep(0.01)
+            success = False
+            while not success:
+                success, frame = self.cap.read()
+            self.store_frame(time.time(), frame)
+            time.sleep(1)
