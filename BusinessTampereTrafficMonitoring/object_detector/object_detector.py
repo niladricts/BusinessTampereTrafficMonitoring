@@ -197,6 +197,7 @@ class ObjectDetector:
             if t - latest_frame >= 0.5:
                 self.store_frame(t, frame)
                 latest_frame = t
+            self.buffer.task_done()
 
     def read_stream(self):
         generator = Thread(target=self.read_stream_to_buffer)
