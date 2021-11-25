@@ -1,7 +1,9 @@
 import os
 import time
 from collections import deque
+from queue import Queue
 from datetime import datetime
+from threading import Thread
 
 import cv2
 import numpy as np
@@ -35,6 +37,7 @@ class ObjectDetector:
 
         # Initializing cache-dict and timestamp-deque for frame storage
         self.cache = dict()
+        self.buffer = Queue()
         self.timestamps = deque([])
 
         self.cap = cv2.VideoCapture(video_location)
@@ -179,20 +182,39 @@ class ObjectDetector:
         else:
             print(f"Failed to save file {file_path}")
 
-    def read_with_exception_handling(self):
-        try:
-            return self.cap.read()
-        except Exception as e:
-            print("Unexpected error happened during cap.read(), ignoring this frame. More info: ", e)
-            return False, None
 
-    def read_stream(self):
-        """
-        Function for reading frames from the stream, runs all the time. Does no operations on the frames.
-        """
+    def read_stream_to_buffer(self):
+        while True:
+            success, frame = self.cap.read()
+            if success:
+                self.buffer.put(frame)
+
+    def read_buffer_to_cache(self):
         latest_frame = 0.0
         while True:
-            success, frame = self.read_with_exception_handling();
+            frame = self.buffer.get()
+            t = time.time()
+            if t - latest_frame >= 0.5:
+                self.store_frame(t, frame)
+                latest_frame = t
+
+    def read_stream(self):
+        generator = Thread(target=self.read_stream_to_buffer)
+        consumer = Thread(target=self.read_buffer_to_cache)
+
+        generator.start()
+        consumer.start()
+
+        generator.join()
+        consumer.join()
+    """   
+    def read_stream(self):
+    """
+#Function for reading frames from the stream, runs all the time. Does no operations on the frames.
+    """
+        latest_frame = 0.0
+        while True:
+            success, frame = self.cap.read()
             if success:
                 t = time.time()
                 # only periodically store frames
@@ -201,3 +223,4 @@ class ObjectDetector:
                     latest_frame = t
             else:
                 time.sleep(0.01)
+    """
