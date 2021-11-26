@@ -41,8 +41,9 @@ class ObjectDetector:
         self.timestamps = deque([])
 
         self.t_latest_frame = 0
+        self.video_location = video_location;
 
-        self.cap = cv2.VideoCapture(video_location)
+        self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
 
         if not self.cap.isOpened():
             print('Cannot open stream')
@@ -197,9 +198,9 @@ class ObjectDetector:
             if t - self.t_latest_frame >= 2:
                 print("Unexpected error happened, reinitializing VideoCapture")
                 self.cap.release()
-                self.cap = cv2.VideoCapture('rtsp://rtsp.kvt.tampere.fi:55489/proxyStream', apiPreference=cv2.CAP_FFMPEG)
+                self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
                 while not self.cap.isOpened():
-                    self.cap = cv2.VideoCapture('rtsp://rtsp.kvt.tampere.fi:55489/proxyStream', apiPreference=cv2.CAP_FFMPEG)
+                    self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
             if t - self.t_latest_frame >= 0.5:
                 self.t_latest_frame = t
                 self.store_frame(t, frame)
