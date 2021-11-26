@@ -214,7 +214,7 @@ class ObjectDetector:
                 self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
                 while not self.cap.isOpened():
                     self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
-                    if t - self.t_latest_frame > 5:
+                    if time.time() - self.t_latest_frame > 5:
                         return -1
             if t - self.t_latest_frame >= 0.5:
                 self.t_latest_frame = t
