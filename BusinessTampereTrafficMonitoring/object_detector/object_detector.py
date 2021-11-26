@@ -1,7 +1,9 @@
 import os
 import time
+import logging
+import queue
+
 from collections import deque
-from queue import Queue
 from datetime import datetime
 from threading import Thread
 
@@ -13,6 +15,16 @@ from tf2_yolov4.model import YOLOv4
 from BusinessTampereTrafficMonitoring.iot_ticket.client import client as iot_client
 from BusinessTampereTrafficMonitoring.tools.geometry import point_inside
 from BusinessTampereTrafficMonitoring.traffic_lights.status import Status
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+
+formatter = logging.Formatter('%(asctime)s:%(name)s:%message)s')
+
+file_handler = logging.FileHandler('object_detector-log')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 
 ALLOWED_CLASSES = [1, 2, 3, 5, 7]
@@ -37,7 +49,7 @@ class ObjectDetector:
 
         # Initializing cache-dict and timestamp-deque for frame storage
         self.cache = dict()
-        self.buffer = Queue()
+        self.buffer = queue.Queue()
         self.timestamps = deque([])
 
         self.t_latest_frame = 0
@@ -193,14 +205,17 @@ class ObjectDetector:
 
     def read_buffer_to_cache(self):
         while True:
-            frame = self.buffer.get()
             t = time.time()
-            if t - self.t_latest_frame >= 2:
+            try:
+                frame = self.buffer.get()
+            except queue.Empty():
                 print("Unexpected error happened, reinitializing VideoCapture")
                 self.cap.release()
                 self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
                 while not self.cap.isOpened():
                     self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
+                    if t - self.t_latest_frame > 5:
+                        return -1
             if t - self.t_latest_frame >= 0.5:
                 self.t_latest_frame = t
                 self.store_frame(t, frame)
