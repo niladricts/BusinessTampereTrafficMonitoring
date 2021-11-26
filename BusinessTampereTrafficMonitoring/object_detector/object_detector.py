@@ -40,13 +40,15 @@ class ObjectDetector:
         self.buffer = Queue()
         self.timestamps = deque([])
 
+        self.t_latest_frame = 0
+
         self.cap = cv2.VideoCapture(video_location)
 
         if not self.cap.isOpened():
             print('Cannot open stream')
             exit(-1)
         if not self.cap.getExceptionMode():
-            self.cap.setExceptionMode(True);
+            self.cap.setExceptionMode(True)
 
         # Initializing required constants
         self.WIDTH = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -182,7 +184,6 @@ class ObjectDetector:
         else:
             print(f"Failed to save file {file_path}")
 
-
     def read_stream_to_buffer(self):
         while True:
             success, frame = self.cap.read()
@@ -190,14 +191,20 @@ class ObjectDetector:
                 self.buffer.put(frame)
 
     def read_buffer_to_cache(self):
-        latest_frame = 0.0
         while True:
             frame = self.buffer.get()
             t = time.time()
-            if t - latest_frame >= 0.5:
+            if t - self.t_latest_frame >= 2:
+                print("Unexpected error happened, reinitializing VideoCapture")
+                self.cap.release()
+                self.cap = cv2.VideoCapture('rtsp://rtsp.kvt.tampere.fi:55489/proxyStream', apiPreference=cv2.CAP_FFMPEG)
+                while not self.cap.isOpened():
+                    self.cap = cv2.VideoCapture('rtsp://rtsp.kvt.tampere.fi:55489/proxyStream', apiPreference=cv2.CAP_FFMPEG)
+            if t - self.t_latest_frame >= 0.5:
+                self.t_latest_frame = t
                 self.store_frame(t, frame)
-                latest_frame = t
             self.buffer.task_done()
+    #TODO: Error logging to file
 
     def read_stream(self):
         generator = Thread(target=self.read_stream_to_buffer)
