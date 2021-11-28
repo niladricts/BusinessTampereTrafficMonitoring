@@ -44,7 +44,7 @@ class Status(Enum):
         http://wiki.itsfactory.fi/images/f/fe/DINT_GRINT_states.pdf
 		# Parameter:
 		# argument1: class with which the method associated with (cls object)
-		# argument12: status_str (String)
+		# argument2: status_str (String)
 		# Returns:
 		# Enum
         """
