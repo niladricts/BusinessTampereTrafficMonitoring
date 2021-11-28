@@ -13,12 +13,12 @@ class SignalGroup:
 
         """
 
-    self.device = device
-    self.name = name
-    self.t_red_start = None
-    self.t_green_start = None
-    self.status = Status.decode(status_code)
-    if self.status == Status.RED:
+       self.device = device
+       self.name = name
+       self.t_red_start = None
+       self.t_green_start = None
+       self.status = Status.decode(status_code)
+       if self.status == Status.RED:
           self.t_red_start = timestamp
 
 

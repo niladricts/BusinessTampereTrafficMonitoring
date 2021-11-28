@@ -37,17 +37,17 @@ class TrafficLightAPIClient:
         # argument3: database connection string (String)
         """
 
-    self.url = url
-    self.monitored_devices = monitored_devices
-    self.active = False
+       self.url = url
+       self.monitored_devices = monitored_devices
+       self.active = False
 
-    # future=True flag enables sqlalchemy 2.0 style usage
-    self.database = sqlalchemy.create_engine(db, future=True)
-    self.db_table = TrafficLightCycle.__table__
-    Base.metadata.create_all(bind=self.database)
+      # future=True flag enables sqlalchemy 2.0 style usage
+       self.database = sqlalchemy.create_engine(db, future=True)
+       self.db_table = TrafficLightCycle.__table__
+       Base.metadata.create_all(bind=self.database)
 
-    # self.__signal_groups is Dict[(str, str), SignalGroup]
-    self.__signal_groups = {}
+      # self.__signal_groups is Dict[(str, str), SignalGroup]
+       self.__signal_groups = {}
 
 
 def update_device_state(self, device: str):
