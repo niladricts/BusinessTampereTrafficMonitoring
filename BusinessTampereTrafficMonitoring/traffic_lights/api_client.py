@@ -18,9 +18,9 @@ Base = declarative_base()
 
 
 class TrafficLightCycle(Base):
-      """
+    """
 	  Creates the table schema for traffic light events
-	  """
+	"""
     __tablename__ = "traffic_light_cycles"
     id = Column("id", Integer, primary_key=True)
     device = Column("device", VARCHAR(20), nullable=False)

@@ -10,6 +10,7 @@ class SignalGroup:
 		# argument2: device name (String)
 		# argument3: timestamp(String)
 		# argument4: status_code(String)
+		
 		"""
         self.device = device
         self.name = name
