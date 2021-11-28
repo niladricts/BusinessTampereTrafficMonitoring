@@ -18,6 +18,9 @@ Base = declarative_base()
 
 
 class TrafficLightCycle(Base):
+      """
+	  Creates the table schema for traffic light events
+	  """
     __tablename__ = "traffic_light_cycles"
     id = Column("id", Integer, primary_key=True)
     device = Column("device", VARCHAR(20), nullable=False)
@@ -29,6 +32,14 @@ class TrafficLightCycle(Base):
 
 class TrafficLightAPIClient:
     def __init__(self, url: str, monitored_devices: List[str], db: str):
+	    """
+		Constructor for initializing TrafficLightAPIClient class
+		
+		#Parameter:
+		# argument1: url (String)
+		# argument2: list of monitored devices List[string]
+		# argument3: database connection string (String)
+		"""
         self.url = url
         self.monitored_devices = monitored_devices
         self.active = False
@@ -47,6 +58,10 @@ class TrafficLightAPIClient:
 
         Returns a list of events that were completed as a result
         of the update.
+		# Parameter:
+		# argument1: device name (String)
+		# Returns:
+		# Event (List[])
         """
         resp = httpx.get(f"{self.url}{device}")
         if resp.status_code != httpx.codes.OK:
@@ -69,7 +84,10 @@ class TrafficLightAPIClient:
         return events
 
     def store(self, events: List):
-        """Stores events into the database."""
+        """Stores events into the database.
+		#Parameter:
+		# argument1: events (List[])
+		"""
         if len(events) < 1:
             return
         with self.database.connect() as db_conn:
@@ -90,6 +108,8 @@ class TrafficLightAPIClient:
 
         This method never returns unless another thread calls stop_polling().
         It is intended to be called in a new thread.
+		# Parameter:
+		# argument1: interval (float)
         """
         if interval <= 0:
             raise ValueError("Polling interval has to be greater than zero")
@@ -110,6 +130,9 @@ class TrafficLightAPIClient:
 
         This method never returns unless another thread calls stop_polling().
         It is intended to be called in a new thread.
+		# Parameter:
+		# argument1: interval (float)
+		# argument2: callback function (Callable)
         """
         if interval <= 0:
             raise ValueError("Polling interval has to be greater than zero")
@@ -137,9 +160,16 @@ class TrafficLightAPIClient:
                             callback(device, sgroup["name"], timestamp, new_status)
 
     def stop_polling(self):
+	    """ To stop polling """
         if self.active:
             self.active = False
 
 
 def _parse_date(dstr):
+    """ Private method to parsing date in YYYY-MM-DD HH:MM:SSTZ format
+	# Parameter:
+	# argument1: dstr(String)
+	# Returns:
+	# DateTime
+	"""
     return datetime.strptime(dstr, "%Y-%m-%dT%H:%M:%S%z")
