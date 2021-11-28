@@ -47,7 +47,8 @@ class Status(Enum):
 		# argument2: status_str (String)
 		# Returns:
 		# Enum
-        """
+        
+		"""
         if len(status_str) != 1 or status_str < '0' or status_str > 'J':
             raise ValueError(f"Invalid traffic light status code: '{status_str}'")
         if status_str in "?@ABCDEFGH90":  # includes amber after red

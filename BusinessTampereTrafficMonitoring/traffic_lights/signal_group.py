@@ -10,7 +10,6 @@ class SignalGroup:
 		# argument2: device name (String)
 		# argument3: timestamp(String)
 		# argument4: status_code(String)
-		
 		"""
         self.device = device
         self.name = name
@@ -27,6 +26,7 @@ class SignalGroup:
 		# argument1: timestamp (TimeStamp)
 		# Returns:
 		# Device id (String), device name(string), red_light start time(TIMESTAMP), green_light start_time(TIMESTAMP), timestamp
+		
 		"""
         return (
             self.device,
@@ -49,7 +49,8 @@ class SignalGroup:
 		# argument2: status_code(String)
 		# Returns:
 		# Event (TrafficLightCycle)
-        """
+        
+		"""
         status = Status.decode(status_code)
         if status == self.status:
             return None

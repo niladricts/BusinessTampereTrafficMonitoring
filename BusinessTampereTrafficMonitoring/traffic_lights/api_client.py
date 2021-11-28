@@ -18,16 +18,13 @@ Base = declarative_base()
 
 
 class TrafficLightCycle(Base):
-    """
-	  Creates the table schema for traffic light events
-	"""
-    __tablename__ = "traffic_light_cycles"
-    id = Column("id", Integer, primary_key=True)
-    device = Column("device", VARCHAR(20), nullable=False)
-    signal_group = Column("signal_group", VARCHAR(20), nullable=False)
-    t_start = Column("t_start", TIMESTAMP, nullable=False)
-    t_green = Column("t_green", TIMESTAMP, nullable=False)
-    t_end = Column("t_end", TIMESTAMP, nullable=False)
+      __tablename__ = "traffic_light_cycles"
+      id = Column("id", Integer, primary_key=True)
+      device = Column("device", VARCHAR(20), nullable=False)
+      signal_group = Column("signal_group", VARCHAR(20), nullable=False)
+      t_start = Column("t_start", TIMESTAMP, nullable=False)
+      t_green = Column("t_green", TIMESTAMP, nullable=False)
+      t_end = Column("t_end", TIMESTAMP, nullable=False)
 
 
 class TrafficLightAPIClient:
@@ -84,9 +81,11 @@ class TrafficLightAPIClient:
         return events
 
     def store(self, events: List):
-        """Stores events into the database.
+        """
+		Stores events into the database.
 		#Parameter:
 		# argument1: events (List[])
+		
 		"""
         if len(events) < 1:
             return
@@ -110,6 +109,7 @@ class TrafficLightAPIClient:
         It is intended to be called in a new thread.
 		# Parameter:
 		# argument1: interval (float)
+		
         """
         if interval <= 0:
             raise ValueError("Polling interval has to be greater than zero")
@@ -133,6 +133,7 @@ class TrafficLightAPIClient:
 		# Parameter:
 		# argument1: interval (float)
 		# argument2: callback function (Callable)
+		
         """
         if interval <= 0:
             raise ValueError("Polling interval has to be greater than zero")
@@ -167,9 +168,11 @@ class TrafficLightAPIClient:
 
 def _parse_date(dstr):
     """ Private method to parsing date in YYYY-MM-DD HH:MM:SSTZ format
+	
 	# Parameter:
 	# argument1: dstr(String)
 	# Returns:
 	# DateTime
+	
 	"""
     return datetime.strptime(dstr, "%Y-%m-%dT%H:%M:%S%z")
