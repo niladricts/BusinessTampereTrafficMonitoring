@@ -3,12 +3,6 @@ from .status import Status
 
 class SignalGroup:
     def __init__(self, device: str, name: str, timestamp: str, status_code: str):
-        """
-        # It is a constructor to initialize the device id, name, timestamp , and status code.
-
-        #Parameters:
-        # Device Id, Device Name, Unix TimeStamp, and status code returned from Status module
-        """
         self.device = device
         self.name = name
         self.t_red_start = None
@@ -18,14 +12,6 @@ class SignalGroup:
             self.t_red_start = timestamp
 
     def __create_event(self, timestamp):
-        """
-        # Returns the event with the fields device id, device name, red light event start, green light event start, and timestamp
-
-        #Parameters:
-        # The Timestamp
-        #Returns:
-        # Event
-        """
         return (
             self.device,
             self.name,
@@ -37,15 +23,11 @@ class SignalGroup:
     def update_state(self, timestamp: str, status_code: str):
         """
         Updates the state of the signal group.
-        #Parameters:
 
-        # Timestamp and status code returned from Status module
-
-        #Returns: 
-        # Returns a tuple representing a traffic light cycle
-        # event (RED to GREEN to RED) if one was completed
-        # as a result of the update.
-        # Otherwise returns None.
+        Returns a tuple representing a traffic light cycle
+        event (RED to GREEN to RED) if one was completed
+        as a result of the update.
+        Otherwise returns None.
         """
         status = Status.decode(status_code)
         if status == self.status:

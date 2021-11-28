@@ -29,12 +29,6 @@ class TrafficLightCycle(Base):
 
 class TrafficLightAPIClient:
     def __init__(self, url: str, monitored_devices: List[str], db: str):
-        """
-        Initializes the list of devices and database
-
-        #Parameters:
-        # List of devices and database connection string
-        """
         self.url = url
         self.monitored_devices = monitored_devices
         self.active = False
@@ -50,12 +44,8 @@ class TrafficLightAPIClient:
     def update_device_state(self, device: str):
         """
         GETs the state of a device from the API.
-        
-        #Parameters:
-        # Device Id
 
-        #Returns:
-        # Returns a list of events that were completed as a result
+        Returns a list of events that were completed as a result
         of the update.
         """
         resp = httpx.get(f"{self.url}{device}")
@@ -79,11 +69,7 @@ class TrafficLightAPIClient:
         return events
 
     def store(self, events: List):
-        """Stores events into the database.
-        
-        #Parameters:
-        # List of events to be inserted
-        """
+        """Stores events into the database."""
         if len(events) < 1:
             return
         with self.database.connect() as db_conn:
@@ -104,10 +90,6 @@ class TrafficLightAPIClient:
 
         This method never returns unless another thread calls stop_polling().
         It is intended to be called in a new thread.
-
-        #Parameters:
-        # The interval for which polling should start
-
         """
         if interval <= 0:
             raise ValueError("Polling interval has to be greater than zero")
@@ -128,9 +110,6 @@ class TrafficLightAPIClient:
 
         This method never returns unless another thread calls stop_polling().
         It is intended to be called in a new thread.
-
-        #Parameters:
-        # Interval and callback method
         """
         if interval <= 0:
             raise ValueError("Polling interval has to be greater than zero")
@@ -158,15 +137,9 @@ class TrafficLightAPIClient:
                             callback(device, sgroup["name"], timestamp, new_status)
 
     def stop_polling(self):
-        """ Polling method to start polling the traffic light events """
         if self.active:
             self.active = False
 
 
 def _parse_date(dstr):
-    """ Format the date in YYYY-MM-dd:HH:MM:SSTZ and returns the formatted date
-
-    #Parameters:
-    # Datestring
-    """
     return datetime.strptime(dstr, "%Y-%m-%dT%H:%M:%S%z")

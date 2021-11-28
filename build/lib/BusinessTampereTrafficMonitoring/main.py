@@ -5,9 +5,7 @@ import time
 from BusinessTampereTrafficMonitoring.object_detector.object_detector import ObjectDetector
 from BusinessTampereTrafficMonitoring.traffic_lights.api_client import TrafficLightAPIClient
 
-# the main entry point of the traffic monitoring application.
-# It calls the traffic light API client for the area SammonAukio
-# It also connects to the IP Camera feed via Tampere VPN and collects the video feeds
+
 with open("config.json", "r") as configfile:
     CONFIG = json.load(configfile)
 
