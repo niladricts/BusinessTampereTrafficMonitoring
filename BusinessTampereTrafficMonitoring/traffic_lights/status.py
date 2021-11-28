@@ -48,7 +48,7 @@ class Status(Enum):
         # It is a class method. So, input is class with which it is associated
 
         # Returns:
-        # It returns the string which contains the color name corresponding to a possible state. Refer the above URL
+        # String: Returning Value
         """
         if len(status_str) != 1 or status_str < '0' or status_str > 'J':
             raise ValueError(f"Invalid traffic light status code: '{status_str}'")

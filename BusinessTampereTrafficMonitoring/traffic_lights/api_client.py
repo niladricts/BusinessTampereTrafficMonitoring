@@ -33,7 +33,8 @@ class TrafficLightAPIClient:
         Initializes the list of devices and database
 
         #Parameters:
-        # List of devices and database connection string
+        # argument1: List[String] (List of strings)
+        # argument2: Connection string (String)
         """
         self.url = url
         self.monitored_devices = monitored_devices
@@ -52,10 +53,10 @@ class TrafficLightAPIClient:
         GETs the state of a device from the API.
         
         #Parameters:
-        # Device Id
+        # argument1: device Id (String)
 
         #Returns:
-        # Returns a list of events that were completed as a result
+        # List: Returns a list of events that were completed as a result
         of the update.
         """
         resp = httpx.get(f"{self.url}{device}")
@@ -82,7 +83,7 @@ class TrafficLightAPIClient:
         """Stores events into the database.
         
         #Parameters:
-        # List of events to be inserted
+        # argument1: List[Events]
         """
         if len(events) < 1:
             return
@@ -106,7 +107,7 @@ class TrafficLightAPIClient:
         It is intended to be called in a new thread.
 
         #Parameters:
-        # The interval for which polling should start
+        # argument1: interval (float)
 
         """
         if interval <= 0:
@@ -130,7 +131,8 @@ class TrafficLightAPIClient:
         It is intended to be called in a new thread.
 
         #Parameters:
-        # Interval and callback method
+        # argument1: interval (float)
+        # argument2: callback method (callable)
         """
         if interval <= 0:
             raise ValueError("Polling interval has to be greater than zero")
@@ -167,6 +169,6 @@ def _parse_date(dstr):
     """ Format the date in YYYY-MM-dd:HH:MM:SSTZ and returns the formatted date
 
     #Parameters:
-    # Datestring
+    # argument1: Datestring (String)
     """
     return datetime.strptime(dstr, "%Y-%m-%dT%H:%M:%S%z")

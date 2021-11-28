@@ -7,7 +7,10 @@ class SignalGroup:
         # It is a constructor to initialize the device id, name, timestamp , and status code.
 
         #Parameters:
-        # Device Id, Device Name, Unix TimeStamp, and status code returned from Status module
+        # argument1: device Id (String)
+        # argument2: device name (String)
+        # argument3: timestamp (String)
+        # argument4: status_code (String)
         """
         self.device = device
         self.name = name
@@ -22,9 +25,9 @@ class SignalGroup:
         # Returns the event with the fields device id, device name, red light event start, green light event start, and timestamp
 
         #Parameters:
-        # The Timestamp
+        # argument1: timestamp (UnixTimestamp)
         #Returns:
-        # Event
+        # Tuple: An event tuple
         """
         return (
             self.device,
@@ -39,10 +42,11 @@ class SignalGroup:
         Updates the state of the signal group.
         #Parameters:
 
-        # Timestamp and status code returned from Status module
+        # argument1: Timestamp (String)
+        # argument2: status_code (String)
 
         #Returns: 
-        # Returns a tuple representing a traffic light cycle
+        # String: Returns a tuple representing a traffic light cycle
         # event (RED to GREEN to RED) if one was completed
         # as a result of the update.
         # Otherwise returns None.
