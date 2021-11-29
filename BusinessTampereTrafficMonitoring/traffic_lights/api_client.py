@@ -96,9 +96,9 @@ class TrafficLightAPIClient:
                  stmt = self.db_table.insert().values(
                         device=device,
                         signal_group=signal_group,
-                        t_start = self._parse_date(t_start),
-                        t_green = self._parse_date(t_green),
-                        t_end = self._parse_date(t_end))
+                        t_start = _parse_date(t_start),
+                        t_green = _parse_date(t_green),
+                        t_end = _parse_date(t_end))
                  db_conn.execute(stmt)
                  db_conn.commit()
 
@@ -148,7 +148,7 @@ class TrafficLightAPIClient:
                      print(f"[traffic_lights] Error fetching data: HTTP {resp.status_code}", flush=True)
                      return
                   obj = resp.json()
-                  timestamp = self._parse_date(obj["timestamp"]).timestamp()
+                  timestamp = _parse_date(obj["timestamp"]).timestamp()
                   device = obj["device"]
 
                   for sgroup in obj["signalGroup"]:
@@ -172,13 +172,13 @@ class TrafficLightAPIClient:
            self.active = False
 
 
-    def _parse_date(dstr):
-        """ Private method to parsing date in YYYY-MM-DD HH:MM:SSTZ format
+def _parse_date(dstr):
+    """ Private method to parsing date in YYYY-MM-DD HH:MM:SSTZ format
 
-	    # Parameter:
-	    # argument1: dstr(String)
-	    # Returns:
-	    # DateTime (String)
+	# Parameter:
+	# argument1: dstr(String)
+	# Returns:
+	# DateTime (String)
 
-	    """
-        return datetime.strptime(dstr, "%Y-%m-%dT%H:%M:%S%z")
+	"""
+    return datetime.strptime(dstr, "%Y-%m-%dT%H:%M:%S%z")
