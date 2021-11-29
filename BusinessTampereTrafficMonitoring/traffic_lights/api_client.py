@@ -148,7 +148,7 @@ class TrafficLightAPIClient:
                      print(f"[traffic_lights] Error fetching data: HTTP {resp.status_code}", flush=True)
                      return
                   obj = resp.json()
-                  timestamp = _parse_date(obj["timestamp"]).timestamp()
+                  timestamp = self._parse_date(obj["timestamp"]).timestamp()
                   device = obj["device"]
 
                   for sgroup in obj["signalGroup"]:
