@@ -94,12 +94,11 @@ class TrafficLightAPIClient:
         with self.database.connect() as db_conn:
              for device, signal_group, t_start, t_green, t_end in events:
                  stmt = self.db_table.insert().values(
-                    device=device,
-                    signal_group=signal_group,
-                    t_start=_parse_date(t_start),
-                    t_green=_parse_date(t_green),
-                    t_end=_parse_date(t_end)
-                    )
+                        device=device,
+                        signal_group=signal_group,
+                        t_start=_parse_date(t_start),
+                        t_green=_parse_date(t_green),
+                        t_end=_parse_date(t_end))
                  db_conn.execute(stmt)
                  db_conn.commit()
 
