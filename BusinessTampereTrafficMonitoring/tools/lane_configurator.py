@@ -41,6 +41,13 @@ def read_args():
 
 
 def print_json(args, lanes, polygons):
+    """
+    prints the result of intersection, camera_id, lane, vertices as a json
+    #Parameter:
+    # argument1: args (Dict)
+    # argument2: lanes(List)
+    # argument3: polygons(List)
+    """
     arr = []
     for i, lane in enumerate(lanes):
         obj = {}
@@ -53,6 +60,9 @@ def print_json(args, lanes, polygons):
 
 
 def main():
+    """
+    Main function to work with the input image
+    """
     args = read_args()
     lanes = args["lane"] or []
     scale = args["scale"] or 1
@@ -73,6 +83,9 @@ def main():
     infotxt = tk.StringVar()
 
     def update_infotxt():
+        """
+        called from main method. Helps in selecting points in the input image
+        """
         if lanes_given and polygon_index >= len(lanes):
             infotxt.set("All required lanes have been configured, you can close the window!")
         elif lanes_given:
@@ -93,6 +106,11 @@ def main():
     canvas.pack()
 
     def onclick(event):
+        """
+        Onclick event triggered upon clicking on the image
+        #Parameter:
+        # argument1: event that triggers the onclick
+        """
         x = event.x
         y = event.y
         points.append((x, y))
@@ -103,6 +121,11 @@ def main():
         update_infotxt()
 
     def finish_polygon(event):
+        """
+        Method for creating a polygon on the input image to get the region of interest.
+        #Parameter:
+        # argument1: Event of button click
+        """
         nonlocal polygon_index, points
         hull = geometry.convex_hull(points)
         kwargs = {"width": LINEWIDTH, "fill": COLORS[polygon_index % len(COLORS)]}
