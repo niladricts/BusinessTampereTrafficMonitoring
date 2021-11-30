@@ -17,12 +17,17 @@ ALLOWED_CLASSES = [1, 2, 3, 5, 7]
 
 
 def lower_center_from_bbox(bbox):
-    return ((bbox[0]+bbox[2]) / 2, bbox[3])
+    return (bbox[0] + bbox[2]) / 2, bbox[3]
 
 
 def find_nearest(array, value):
     """
     Utility function for finding array element with closest value to value-parameter
+    #Required Parameter:
+      array: Array of values (Array)
+      value: value from which distance should be measured (Int)
+    #Returns:
+     array[element]: Array element closest to value-parameter (Int)
     """
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
@@ -75,6 +80,9 @@ class ObjectDetector:
         self.timestamps.append(timestamp)
 
     def get_frame(self, timestamp=None):
+        """
+        Find the frame for the given timestamp
+        """
         if timestamp is None:
             timestamp = time.time()
         return self.cache[find_nearest(self.timestamps, timestamp)]
@@ -86,6 +94,11 @@ class ObjectDetector:
             Matches the given parameters to specific frames.
             Calls necessary utility functions to transform given parameters to usable formats.
             Does operations on the frames to extract vehicle counts per lane and stores the count, timestamp and lane.
+        #Required arguments:
+         intersection: Intersection details
+         sgroup: Signal Group( Signal Group object)
+         epoch_time: Unix Epoch Time(Unix Timestamp)
+         light_status: Status of the green or red light (Int)
         """
         print(f"[{datetime.fromtimestamp(epoch_time):%H:%M:%S}] light for {sgroup} changed to {light_status}")
         # light changes from red to green are not handled (yet)
@@ -142,6 +155,16 @@ class ObjectDetector:
         self.save_image_for_debugging(frame_at_the_time, sgroup, vehicle_count, boxes, points, epoch_time)
 
     def save_image_for_debugging(self, img, sgroup, vehicle_count, boxes, detections, timestamp):
+        """
+        Saves image from the video after detecting the objects
+        #Required arguments:
+        # img: Image (Image)
+        # sgroup: Signal Group (Signal Group Object)
+        # vehicle_count: count of vehicles detected (Int)
+        # boxes: List of boxes with height and width (List[])
+        # points: List of points(List[Double,Double])
+        # timestamp: Timestamp (Unix Timestamp)
+        """
         directory = os.path.abspath("./frames")
         if not os.path.exists(directory):
             os.makedirs(directory)

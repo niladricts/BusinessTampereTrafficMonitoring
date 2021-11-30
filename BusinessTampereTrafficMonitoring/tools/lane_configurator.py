@@ -43,10 +43,10 @@ def read_args():
 def print_json(args, lanes, polygons):
     """
     prints the result of intersection, camera_id, lane, vertices as a json
-    #Parameter:
-    # argument1: args (Dict)
-    # argument2: lanes(List)
-    # argument3: polygons(List)
+    #Required arguments:
+      args: Dictionary of arguments(Dict)
+      lanes : List of lanes (List)
+      polygons: List of polygons(List)
     """
     arr = []
     for i, lane in enumerate(lanes):
@@ -108,8 +108,8 @@ def main():
     def onclick(event):
         """
         Onclick event triggered upon clicking on the image
-        #Parameter:
-        # argument1: event that triggers the onclick
+        #Required arguments:
+          event : event that triggers the onclick
         """
         x = event.x
         y = event.y
@@ -123,8 +123,8 @@ def main():
     def finish_polygon(event):
         """
         Method for creating a polygon on the input image to get the region of interest.
-        #Parameter:
-        # argument1: Event of button click
+        #Required arguments:
+          event : Event of button click
         """
         nonlocal polygon_index, points
         hull = geometry.convex_hull(points)
