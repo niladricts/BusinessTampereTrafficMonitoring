@@ -24,11 +24,10 @@ class SignalGroup:
     def __create_event(self, timestamp):
         """
 
-        To create the traffic light cycle event
-        # Parameter:
-        # argument1: timestamp (TimeStamp)
-        # Returns:
-        # Device id (String), device name(string), red_light start time(TIMESTAMP), green_light start_time(TIMESTAMP), timestamp
+        To create the traffic light cycle event # Parameter: # argument1: timestamp (TimeStamp)
+        # Returns: # Device
+        id (String), device name(string), red_light start time(TIMESTAMP), green_light start_time(TIMESTAMP),
+        timestamp
 
         """
 
