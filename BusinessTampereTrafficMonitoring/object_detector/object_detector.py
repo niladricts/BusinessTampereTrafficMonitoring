@@ -1,31 +1,14 @@
 import os
-import time
-import logging
-import queue
-
-from collections import deque
-from datetime import datetime
-from threading import Thread
-
 import cv2
 import numpy as np
+from datetime import datetime
 from tf2_yolov4.anchors import YOLOV4_ANCHORS
 from tf2_yolov4.model import YOLOv4
 
+from BusinessTampereTrafficMonitoring.stream_reader.stream_reader import StreamReader
 from BusinessTampereTrafficMonitoring.iot_ticket.client import client as iot_client
 from BusinessTampereTrafficMonitoring.tools.geometry import point_inside
 from BusinessTampereTrafficMonitoring.traffic_lights.status import Status
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
-
-formatter = logging.Formatter('%(asctime)s:%(name)s:%message)s')
-
-file_handler = logging.FileHandler('object_detector-log')
-file_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
-
 
 ALLOWED_CLASSES = [1, 2, 3, 5, 7]
 
@@ -34,38 +17,14 @@ def lower_center_from_bbox(bbox):
     return ((bbox[0]+bbox[2]) / 2, bbox[3])
 
 
-def find_nearest(array, value):
-    """
-    Utility function for finding array element with closest value to value-parameter
-    """
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    return array[idx]
-
-
 class ObjectDetector:
     def __init__(self, video_location, config):
         self.config = config
 
-        # Initializing cache-dict and timestamp-deque for frame storage
-        self.cache = dict()
-        self.buffer = queue.Queue()
-        self.timestamps = deque([])
-
-        self.t_latest_frame = 0
-        self.video_location = video_location;
-
-        self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
-
-        if not self.cap.isOpened():
-            print('Cannot open stream')
-            exit(-1)
-        if not self.cap.getExceptionMode():
-            self.cap.setExceptionMode(True)
+        self.stream_reader = StreamReader(video_location)
 
         # Initializing required constants
-        self.WIDTH = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.HEIGHT = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        self.WIDTH, self.HEIGHT = self.stream_reader.get_constants()
 
         # Initializing model parameters
         self.model = YOLOv4(
@@ -80,24 +39,6 @@ class ObjectDetector:
 
         # Loading the pretrained weights to the model
         self.model.load_weights('yolov4.h5')
-
-    def store_frame(self, timestamp, frame):
-        """
-        Function for storing a time-stamp associated frame to cache
-        Inputs:
-            time: UNIX time stamp
-            frame: frame read using CV2, no operations done prior
-        """
-        if len(self.timestamps) == 200:
-            self.cache.pop(self.timestamps[0])
-            self.timestamps.popleft()
-        self.cache[timestamp] = frame
-        self.timestamps.append(timestamp)
-
-    def get_frame(self, timestamp=None):
-        if timestamp is None:
-            timestamp = time.time()
-        return self.cache[find_nearest(self.timestamps, timestamp)]
 
     def detect_by_signal_group_and_time(self, intersection, sgroup, epoch_time, light_status):
         """
@@ -119,7 +60,7 @@ class ObjectDetector:
             # No lanes for this signal group are monitored
             return
 
-        frame_at_the_time = self.get_frame(epoch_time)
+        frame_at_the_time = self.stream_reader.get_frame(epoch_time)
         prediction_frame = np.expand_dims(frame_at_the_time, axis=0) / 255.0
         boxes, scores, classes, detections = self.model.predict(prediction_frame)
 
@@ -197,54 +138,3 @@ class ObjectDetector:
         else:
             print(f"Failed to save file {file_path}")
 
-    def read_stream_to_buffer(self):
-        while True:
-            success, frame = self.cap.read()
-            if success:
-                self.buffer.put(frame)
-
-    def read_buffer_to_cache(self):
-        while True:
-            t = time.time()
-            try:
-                frame = self.buffer.get()
-            except queue.Empty():
-                print("Unexpected error happened, reinitializing VideoCapture")
-                self.cap.release()
-                self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
-                while not self.cap.isOpened():
-                    self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
-                    if time.time() - self.t_latest_frame > 5:
-                        return -1
-            if t - self.t_latest_frame >= 0.5:
-                self.t_latest_frame = t
-                self.store_frame(t, frame)
-            self.buffer.task_done()
-    #TODO: Error logging to file
-
-    def read_stream(self):
-        generator = Thread(target=self.read_stream_to_buffer)
-        consumer = Thread(target=self.read_buffer_to_cache)
-
-        generator.start()
-        consumer.start()
-
-        generator.join()
-        consumer.join()
-    """   
-    def read_stream(self):
-    """
-#Function for reading frames from the stream, runs all the time. Does no operations on the frames.
-    """
-        latest_frame = 0.0
-        while True:
-            success, frame = self.cap.read()
-            if success:
-                t = time.time()
-                # only periodically store frames
-                if t - latest_frame >= 0.5:
-                    self.store_frame(t, frame)
-                    latest_frame = t
-            else:
-                time.sleep(0.01)
-    """
