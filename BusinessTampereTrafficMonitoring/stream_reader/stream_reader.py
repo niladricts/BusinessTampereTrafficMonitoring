@@ -76,6 +76,7 @@ class StreamReader:
                 self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
                 while not self.cap.isOpened():
                     self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
+                    time.sleep(1)
                     if time.time() - self.t_latest_frame > 5:
                         return -1
             if t - self.t_latest_frame >= 0.5:
