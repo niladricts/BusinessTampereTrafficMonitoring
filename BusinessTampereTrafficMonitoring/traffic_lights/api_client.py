@@ -49,7 +49,6 @@ class TrafficLightAPIClient:
         # self.__signal_groups is Dict[(str, str), SignalGroup]
         self.__signal_groups = {}
 
-
     def update_device_state(self, device: str):
         """
         GETs the state of a device from the API.
@@ -63,8 +62,8 @@ class TrafficLightAPIClient:
         """
         resp = httpx.get(f"{self.url}{device}")
         if resp.status_code != httpx.codes.OK:
-           print(f"[traffic_lights] Error fetching data: HTTP {resp.status_code}", flush=True)
-           return
+            print(f"[traffic_lights] Error fetching data: HTTP {resp.status_code}", flush=True)
+            return
         obj = resp.json()
         timestamp = obj["timestamp"]
         device = obj["device"]
@@ -74,13 +73,12 @@ class TrafficLightAPIClient:
             sg = (device, sgroup["name"])
             status = sgroup["status"]
             if sg not in self.__signal_groups:
-               self.__signal_groups[sg] = SignalGroup(*sg, timestamp, status)
+                self.__signal_groups[sg] = SignalGroup(*sg, timestamp, status)
             else:
-                 event = self.__signal_groups[sg].update_state(timestamp, status)
-                 if event is not None:
+                event = self.__signal_groups[sg].update_state(timestamp, status)
+                if event is not None:
                     events.append(event)
         return events
-
 
     def store(self, events: List):
         """
@@ -90,18 +88,17 @@ class TrafficLightAPIClient:
 
         """
         if len(events) < 1:
-           return
+            return
         with self.database.connect() as db_conn:
-             for device, signal_group, t_start, t_green, t_end in events:
-                 stmt = self.db_table.insert().values(
-                        device=device,
-                        signal_group=signal_group,
-                        t_start = _parse_date(t_start),
-                        t_green = _parse_date(t_green),
-                        t_end = _parse_date(t_end))
-                 db_conn.execute(stmt)
-                 db_conn.commit()
-
+            for device, signal_group, t_start, t_green, t_end in events:
+                stmt = self.db_table.insert().values(
+                    device=device,
+                    signal_group=signal_group,
+                    t_start=_parse_date(t_start),
+                    t_green=_parse_date(t_green),
+                    t_end=_parse_date(t_end))
+                db_conn.execute(stmt)
+                db_conn.commit()
 
     def start_polling(self, interval: float):
         """
@@ -114,17 +111,16 @@ class TrafficLightAPIClient:
 
         """
         if interval <= 0:
-           raise ValueError("Polling interval has to be greater than zero")
+            raise ValueError("Polling interval has to be greater than zero")
         self.active = True
         while self.active:
-        # keep track of completed cycles in all signal groups
-              events = []
-              for device in self.monitored_devices:
-                  events.extend(self.update_device_state(device))
-        # store all completed cycles in database
-              self.store(events)
-              time.sleep(interval)
-
+            # keep track of completed cycles in all signal groups
+            events = []
+            for device in self.monitored_devices:
+                events.extend(self.update_device_state(device))
+            # store all completed cycles in database
+            self.store(events)
+            time.sleep(interval)
 
     def listen_for_light_change_events(self, interval: float, callback: Callable):
         """
@@ -139,46 +135,44 @@ class TrafficLightAPIClient:
 
         """
         if interval <= 0:
-           raise ValueError("Polling interval has to be greater than zero")
+            raise ValueError("Polling interval has to be greater than zero")
         self.active = True
         while self.active:
-              for device in self.monitored_devices:
-                  resp = httpx.get(f"{self.url}{device}")
-                  if resp.status_code != httpx.codes.OK:
-                     print(f"[traffic_lights] Error fetching data: HTTP {resp.status_code}", flush=True)
-                     return
-                  obj = resp.json()
-                  timestamp = _parse_date(obj["timestamp"]).timestamp()
-                  device = obj["device"]
+            for device in self.monitored_devices:
+                resp = httpx.get(f"{self.url}{device}")
+                if resp.status_code != httpx.codes.OK:
+                    print(f"[traffic_lights] Error fetching data: HTTP {resp.status_code}", flush=True)
+                    return
+                obj = resp.json()
+                timestamp = _parse_date(obj["timestamp"]).timestamp()
+                device = obj["device"]
 
-                  for sgroup in obj["signalGroup"]:
-                      sg = (device, sgroup["name"])
-                      status = sgroup["status"]
-                      if sg not in self.__signal_groups:
-                         self.__signal_groups[sg] = SignalGroup(*sg, timestamp, status)
-                      else:
-                            old_status = self.__signal_groups[sg].status
-                            self.__signal_groups[sg].update_state(timestamp, status)
-                            new_status = self.__signal_groups[sg].status
-                            if old_status != new_status:
-                               callback(device, sgroup["name"], timestamp, new_status)
-
+                for sgroup in obj["signalGroup"]:
+                    sg = (device, sgroup["name"])
+                    status = sgroup["status"]
+                    if sg not in self.__signal_groups:
+                        self.__signal_groups[sg] = SignalGroup(*sg, timestamp, status)
+                    else:
+                        old_status = self.__signal_groups[sg].status
+                        self.__signal_groups[sg].update_state(timestamp, status)
+                        new_status = self.__signal_groups[sg].status
+                        if old_status != new_status:
+                            callback(device, sgroup["name"], timestamp, new_status)
 
     def stop_polling(self):
         """ To stop polling """
 
-
         if self.active:
-           self.active = False
+            self.active = False
 
 
 def _parse_date(dstr):
     """ Private method to parsing date in YYYY-MM-DD HH:MM:SSTZ format
+        #Parameter:
+        argument1: dstr(String)
+       #Returns:
+       DateTime (String)
 
-	# Parameter:
-	# argument1: dstr(String)
-	# Returns:
-	# DateTime (String)
+    """
 
-	"""
     return datetime.strptime(dstr, "%Y-%m-%dT%H:%M:%S%z")
