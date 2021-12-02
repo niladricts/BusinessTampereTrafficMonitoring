@@ -42,7 +42,7 @@ class Status(Enum):
 
         Detailed documentation:
         http://wiki.itsfactory.fi/images/f/fe/DINT_GRINT_states.pdf
-        
+
         # Returns:
           Either Status.RED, Status.GREEN, or Status.OTHER
         """
