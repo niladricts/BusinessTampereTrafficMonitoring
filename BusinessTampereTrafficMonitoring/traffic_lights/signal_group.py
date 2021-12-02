@@ -9,7 +9,8 @@ class SignalGroup:
           device: device (intersection) id, for example "TRE401" (str)
           name: name of the signal group, for example "A" or "RV1" (str)
           timestamp: timestamp as returned from the traffic light API (str)
-          status_code: One character string representing the initial state of the traffic light, as returned from the API (str)
+          status_code: One character string representing the initial state of the
+                       traffic light, as returned from the API (str)
         """
         self.device = device
         self.name = name

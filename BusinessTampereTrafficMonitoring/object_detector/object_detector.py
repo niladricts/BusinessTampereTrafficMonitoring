@@ -104,7 +104,7 @@ class ObjectDetector:
           intersection: Intersection id, for example "TRE401" (str)
           sgroup: Signal group id, for example "A" or "RV1" (str)
           epoch_time: Epoch time in seconds (float)
-          light_status: Current status of the traffic light (BusinessTampereTrafficMonitoring.traffic_lights.status.Status)
+          light_status: Current status of the traffic light (Status)
         """
         print(f"[{datetime.fromtimestamp(epoch_time):%H:%M:%S}] light for {sgroup} changed to {light_status}")
         # light changes from red to green are not handled (yet)

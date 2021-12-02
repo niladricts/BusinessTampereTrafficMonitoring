@@ -32,8 +32,8 @@ class TrafficLightAPIClient:
         Initializes TrafficLightAPIClient.
 
         # Parameters:
-          url: URL of the traffic light API end point (str), Example: "http://trafficlights.tampere.fi/api/v1/deviceState/"
-          monitored_devices: list of intersections (List[str]), Example: ["TRE401", "TRE428"]
+          url: URL of the traffic light API (str), for example  "http://trafficlights.tampere.fi/api/v1/deviceState/"
+          monitored_devices: list of intersections, for example ["TRE401", "TRE428"] (List[str])
           db: database connection URL in SQL Alchemy format (str)
         """
         self.url = url
