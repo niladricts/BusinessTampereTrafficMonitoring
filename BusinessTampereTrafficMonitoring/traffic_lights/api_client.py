@@ -98,7 +98,7 @@ class TrafficLightAPIClient:
                     t_green=_parse_date(t_green),
                     t_end=_parse_date(t_end))
                 db_conn.execute(stmt)
-                db_conn.commit()
+            db_conn.commit()
 
     def start_polling(self, interval: float):
         """

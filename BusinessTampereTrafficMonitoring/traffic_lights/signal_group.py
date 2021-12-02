@@ -70,7 +70,7 @@ class SignalGroup:
             # were multiple state changes during the polling interval
             if self.t_red_start is not None:
                 self.t_green_start = timestamp
-                return None
+            return None
         elif status == Status.RED:
             if self.t_green_start is not None:
                 # Transition from GREEN to RED completes the cycle
