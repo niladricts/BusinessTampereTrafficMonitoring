@@ -31,8 +31,8 @@ class StreamReader:
 
         self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
         if not self.cap.isOpened():
-            print('Cannot open stream')
-            exit(-1)
+            logger.error('Couldnt open stream')
+            raise IOError('Couldnt open stream')
         self.WIDTH = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.HEIGHT = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
@@ -77,14 +77,15 @@ class StreamReader:
             t = time.time()
             try:
                 frame = self.buffer.get()
-            except queue.Empty():
-                print("Unexpected error happened, reinitializing VideoCapture")
+            except queue.Empty:
+                logger.error("Unexpected error happened, reinitializing VideoCapture")
                 self.cap.release()
                 self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
                 while not self.cap.isOpened():
                     self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
                     time.sleep(1)
                     if time.time() - self.t_latest_frame > 5:
+                        logger.error("Couldn't recover. More info: " + str(queue.Empty))
                         return -1
             if t - self.t_latest_frame >= 0.5:
                 self.t_latest_frame = t
