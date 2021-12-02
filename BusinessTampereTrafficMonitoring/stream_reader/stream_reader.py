@@ -59,8 +59,10 @@ class StreamReader:
             self.timestamps.popleft()
         self.cache[timestamp] = frame
         self.timestamps.append(timestamp)
-        
-    def get_frame(self, epoch_time):
+
+    def get_frame(self, epoch_time=None):
+        if epoch_time is None:
+            epoch_time = time.time()
         return self.cache[self.find_nearest(self.timestamps, epoch_time)]
 
     def read_stream_to_buffer(self):
