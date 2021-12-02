@@ -8,6 +8,15 @@ COUNTERCLOCKWISE = 2
 
 
 def orientation(p1: Tuple[float, float], p2: Tuple[float, float], p3: Tuple[float, float]):
+    """
+    Returns the orientation of the three points
+    # Parameters:
+      p1: Coordinate 1 (Tuple[float,float])
+      p2: Coordinate 2 (Tuple[float,float])
+      p3: Coordinate 3 (Tuple[float,float])
+    # Returns:
+      Orientation (either COLINEAR or CLOCKWISE or COUNTERCLOCKWISE)
+    """
     value = (p2[1] - p1[1]) * (p3[0] - p2[0]) - (p2[0] - p1[0]) * (p3[1] - p2[1])
     if value < 0:
         return COUNTERCLOCKWISE
@@ -18,7 +27,13 @@ def orientation(p1: Tuple[float, float], p2: Tuple[float, float], p3: Tuple[floa
 
 
 def convex_hull(points: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
-    """Return convex hull of 2D points."""
+    """
+    Returns the convex hull of a set of 2D points.
+    # Parameters:
+      points: Coordinates of the points (x, y) (List[Tuple[float,float]])
+    # Returns:
+      Convex hull (List[Tuple[float,float]])
+    """
     # remove duplicates
     points = list(set(points))
 
@@ -54,6 +69,11 @@ def point_inside(point: Tuple[float, float], hull: List[Tuple[float, float]]):
     """
     Returns True if a point is inside a convex hull, False otherwise.
     Points located exactly on the edge may return either.
+    # Parameters:
+      point: Tuple of two coordinates (x, y) (Tuple[float,float])
+      hull: List of points in the hull (List[Tuple[float,float]])
+    # Returns:
+      Whether or not the point is inside the convex hull (bool)
     """
     points = hull + [point]
     return point not in convex_hull(points)

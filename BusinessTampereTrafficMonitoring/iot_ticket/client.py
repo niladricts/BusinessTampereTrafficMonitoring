@@ -21,10 +21,10 @@ class Client(iotticket.client.Client):
 
         Required keyword arguments:
         ===========================
-        device_id:  Device ID for the camera (defined in IoT Ticket)
-        lane:       Lane ID ("Data tag" name in IoT Ticket)
-        count:      Number of cars on the lane at the given moment
-        timestamp:  Unix timestamp in seconds (when the cars were counted)
+        device_id:  Device ID for the camera (defined in IoT Ticket) (str)
+        lane:       Lane ID ("Data tag" name in IoT Ticket) (str)
+        count:      Number of cars on the lane at the given moment (int)
+        timestamp:  Unix timestamp in seconds (when the cars were counted) (float)
 
         Usage example:
         ==============
@@ -34,7 +34,6 @@ class Client(iotticket.client.Client):
             count=12,
             timestamp=time.time())
         """
-
         time_ms = int(1000 * timestamp)
         nv = datanodesvalue(name=lane, dataType="long", ts=time_ms, v=count, unit="cars")
 

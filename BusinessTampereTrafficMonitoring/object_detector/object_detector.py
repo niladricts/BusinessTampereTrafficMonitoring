@@ -15,8 +15,7 @@ ALLOWED_CLASSES = [1, 2, 3, 5, 7]
 
 
 def lower_center_from_bbox(bbox):
-    return (bbox[0]+bbox[2]) / 2, bbox[3]
-
+    return (bbox[0] + bbox[2]) / 2, bbox[3]
 
 class ObjectDetector:
     def __init__(self, video_location, config):
@@ -48,6 +47,11 @@ class ObjectDetector:
             Matches the given parameters to specific frames.
             Calls necessary utility functions to transform given parameters to usable formats.
             Does operations on the frames to extract vehicle counts per lane and stores the count, timestamp and lane.
+        # Parameters:
+          intersection: Intersection id, for example "TRE401" (str)
+          sgroup: Signal group id, for example "A" or "RV1" (str)
+          epoch_time: Epoch time in seconds (float)
+          light_status: Current status of the traffic light (Status)
         """
         print(f"[{datetime.fromtimestamp(epoch_time):%H:%M:%S}] light for {sgroup} changed to {light_status}")
         # light changes from red to green are not handled (yet)
@@ -114,6 +118,16 @@ class ObjectDetector:
         return vehicle_count
 
     def save_image_for_debugging(self, img, sgroup, vehicle_count, boxes, detections, timestamp):
+        """
+        Draws detected objects in a frame and saves the image on disk.
+        # Parameters:
+          img: Numpy array representing the image (numpy.ndarray)
+          sgroup: Signal group id, for example "A" or "RV1" (str)
+          vehicle_count: Number of vehicles detected (int)
+          boxes: List of boxes with four coordinates (x0, y0, x1, y1) (List[float])
+          points: List of detections to be drawn in the image. (List[Tuple[float, float]])
+          timestamp: Epoch time in seconds (float)
+        """
         directory = os.path.abspath("./frames")
         if not os.path.exists(directory):
             os.makedirs(directory)
