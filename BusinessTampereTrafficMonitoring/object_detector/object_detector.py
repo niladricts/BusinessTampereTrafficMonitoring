@@ -14,7 +14,7 @@ ALLOWED_CLASSES = [1, 2, 3, 5, 7]
 
 
 def lower_center_from_bbox(bbox):
-    return ((bbox[0]+bbox[2]) / 2, bbox[3])
+    return (bbox[0]+bbox[2]) / 2, bbox[3]
 
 
 class ObjectDetector:
@@ -61,18 +61,27 @@ class ObjectDetector:
             return
 
         frame_at_the_time = self.stream_reader.get_frame(epoch_time)
-        prediction_frame = np.expand_dims(frame_at_the_time, axis=0) / 255.0
-        boxes, scores, classes, detections = self.model.predict(prediction_frame)
+        points, boxes = self.detect(frame_at_the_time)
+        lanes = self.process_detections(points, lanes)
+        vehicle_count = self.post_detections(lanes, epoch_time)
 
+        # TODO: put this behind a flag or something
+        self.save_image_for_debugging(frame_at_the_time, sgroup, vehicle_count, boxes, points, epoch_time)
+
+    def detect(self, frame):
+        prediction_frame = np.expand_dims(frame, axis=0) / 255.0
+        boxes, scores, classes, detections = self.model.predict(prediction_frame)
         boxes = boxes[0] * [self.WIDTH, self.HEIGHT, self.WIDTH, self.HEIGHT]
         scores = scores[0]
         classes = classes[0].astype(int)
-
         points = []
         for box, score, cls in zip(boxes, scores, classes):
             if cls in ALLOWED_CLASSES:
                 points.append(lower_center_from_bbox(box))
+        return points, boxes
 
+    @staticmethod
+    def process_detections(points, lanes):
         for lane in lanes:
             lane["cars"] = 0
         # Count detected cars by lane
@@ -85,7 +94,10 @@ class ObjectDetector:
                 if point_inside(point, vertices):
                     lane["cars"] += 1
                     break
+        return lanes
 
+    @staticmethod
+    def post_detections(lanes, epoch_time):
         vehicle_count = 0
         for lane in lanes:
             lane_id = lane["lane"]
@@ -98,9 +110,7 @@ class ObjectDetector:
                 count=cars,
                 timestamp=epoch_time)
             vehicle_count += cars
-
-        # TODO: put this behind a flag or something
-        self.save_image_for_debugging(frame_at_the_time, sgroup, vehicle_count, boxes, points, epoch_time)
+        return vehicle_count
 
     def save_image_for_debugging(self, img, sgroup, vehicle_count, boxes, detections, timestamp):
         directory = os.path.abspath("./frames")
