@@ -1,12 +1,13 @@
 import os
+from datetime import datetime
+
 import cv2
 import numpy as np
-from datetime import datetime
 from tf2_yolov4.anchors import YOLOV4_ANCHORS
 from tf2_yolov4.model import YOLOv4
 
-from BusinessTampereTrafficMonitoring.stream_reader.stream_reader import StreamReader
 from BusinessTampereTrafficMonitoring.iot_ticket.client import client as iot_client
+from BusinessTampereTrafficMonitoring.stream_reader.stream_reader import StreamReader
 from BusinessTampereTrafficMonitoring.tools.geometry import point_inside
 from BusinessTampereTrafficMonitoring.traffic_lights.status import Status
 
@@ -147,4 +148,3 @@ class ObjectDetector:
             print(f"Saved detections to {file_path}")
         else:
             print(f"Failed to save file {file_path}")
-

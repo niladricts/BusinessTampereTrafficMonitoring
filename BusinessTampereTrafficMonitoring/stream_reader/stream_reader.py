@@ -1,8 +1,9 @@
 import logging
 import queue
+import time
 from collections import deque
 from threading import Thread
-import time
+
 import cv2
 import numpy as np
 
