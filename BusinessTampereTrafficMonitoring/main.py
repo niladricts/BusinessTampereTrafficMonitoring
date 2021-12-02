@@ -23,7 +23,7 @@ object_detector = ObjectDetector(
 )
 
 video_reading = threading.Thread(
-    target=object_detector.read_stream,
+    target=object_detector.stream_reader.read_stream,
     args=tuple(),
     daemon=True
 )

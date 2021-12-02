@@ -1,6 +1,4 @@
 import os
-import time
-from collections import deque
 from datetime import datetime
 
 import cv2
@@ -9,9 +7,9 @@ from tf2_yolov4.anchors import YOLOV4_ANCHORS
 from tf2_yolov4.model import YOLOv4
 
 from BusinessTampereTrafficMonitoring.iot_ticket.client import client as iot_client
+from BusinessTampereTrafficMonitoring.stream_reader.stream_reader import StreamReader
 from BusinessTampereTrafficMonitoring.tools.geometry import point_inside
 from BusinessTampereTrafficMonitoring.traffic_lights.status import Status
-
 
 ALLOWED_CLASSES = [1, 2, 3, 5, 7]
 
@@ -20,38 +18,14 @@ def lower_center_from_bbox(bbox):
     return (bbox[0] + bbox[2]) / 2, bbox[3]
 
 
-def find_nearest(array, value):
-    """
-    Utility function for finding array element with closest value to value-parameter.
-    Raises a ValueError exception if called with an empty array.
-    # Parameters:
-      array: Array of values (numpy.typing.ArrayLike)
-      value: Value from which distance should be measured (float)
-    # Returns:
-      Element of the array that is closest to value (float)
-    """
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    return array[idx]
-
-
 class ObjectDetector:
     def __init__(self, video_location, config):
         self.config = config
 
-        # Initializing cache-dict and timestamp-deque for frame storage
-        self.cache = dict()
-        self.timestamps = deque([])
-
-        self.cap = cv2.VideoCapture(video_location)
-
-        if not self.cap.isOpened():
-            print('Cannot open stream')
-            exit(-1)
+        self.stream_reader = StreamReader(video_location)
 
         # Initializing required constants
-        self.WIDTH = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.HEIGHT = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        self.WIDTH, self.HEIGHT = self.stream_reader.get_constants()
 
         # Initializing model parameters
         self.model = YOLOv4(
@@ -66,32 +40,6 @@ class ObjectDetector:
 
         # Loading the pretrained weights to the model
         self.model.load_weights('yolov4.h5')
-
-    def store_frame(self, timestamp, frame):
-        """
-        Function for storing a time-stamp associated frame to cache
-        # Parameters:
-          timestamp: Epoch time in seconds (float)
-          frame: frame read using CV2, no operations done prior
-        """
-        if len(self.timestamps) == 200:
-            self.cache.pop(self.timestamps[0])
-            self.timestamps.popleft()
-        self.cache[timestamp] = frame
-        self.timestamps.append(timestamp)
-
-    def get_frame(self, timestamp=None):
-        """
-        Find the frame for a given timestamp.
-        If timestamp is not given, return the frame closest to current time.
-        # Parameters:
-          timestamp: Epoch time in seconds (float)
-        # Returns:
-          The frame as numpy.ndarray
-        """
-        if timestamp is None:
-            timestamp = time.time()
-        return self.cache[find_nearest(self.timestamps, timestamp)]
 
     def detect_by_signal_group_and_time(self, intersection, sgroup, epoch_time, light_status):
         """
@@ -118,32 +66,44 @@ class ObjectDetector:
             # No lanes for this signal group are monitored
             return
 
-        frame_at_the_time = self.get_frame(epoch_time)
-        prediction_frame = np.expand_dims(frame_at_the_time, axis=0) / 255.0
-        boxes, scores, classes, detections = self.model.predict(prediction_frame)
+        frame_at_the_time = self.stream_reader.get_frame(epoch_time)
+        points, boxes = self.detect(frame_at_the_time)
+        lanes = self.process_detections(points, lanes)
+        vehicle_count = self.post_detections(lanes, epoch_time)
 
+        # TODO: put this behind a flag or something
+        self.save_image_for_debugging(frame_at_the_time, sgroup, vehicle_count, boxes, points, epoch_time)
+
+    def detect(self, frame):
+        prediction_frame = np.expand_dims(frame, axis=0) / 255.0
+        boxes, scores, classes, detections = self.model.predict(prediction_frame)
         boxes = boxes[0] * [self.WIDTH, self.HEIGHT, self.WIDTH, self.HEIGHT]
         scores = scores[0]
         classes = classes[0].astype(int)
-
         points = []
         for box, score, cls in zip(boxes, scores, classes):
             if cls in ALLOWED_CLASSES:
                 points.append(lower_center_from_bbox(box))
+        return points, boxes
 
+    @staticmethod
+    def process_detections(points, lanes):
         for lane in lanes:
             lane["cars"] = 0
         # Count detected cars by lane
         # TODO: this can be optimized
         for point in points:
+            # point_inside() expects list of tuples, but vertices
+            # that are read from json are lists
             for lane in lanes:
-                # point_inside() expects list of tuples, but vertices
-                # that are read from json are lists
                 vertices = [tuple(xy) for xy in lane["vertices"]]
                 if point_inside(point, vertices):
                     lane["cars"] += 1
                     break
+        return lanes
 
+    @staticmethod
+    def post_detections(lanes, epoch_time):
         vehicle_count = 0
         for lane in lanes:
             lane_id = lane["lane"]
@@ -156,9 +116,7 @@ class ObjectDetector:
                 count=cars,
                 timestamp=epoch_time)
             vehicle_count += cars
-
-        # TODO: put this behind a flag or something
-        self.save_image_for_debugging(frame_at_the_time, sgroup, vehicle_count, boxes, points, epoch_time)
+        return vehicle_count
 
     def save_image_for_debugging(self, img, sgroup, vehicle_count, boxes, detections, timestamp):
         """
@@ -205,20 +163,3 @@ class ObjectDetector:
             print(f"Saved detections to {file_path}")
         else:
             print(f"Failed to save file {file_path}")
-
-    def read_stream(self):
-        """
-        Reads frames from the stream into cache, runs all the time.
-        Does no operations on the frames.
-        """
-        latest_frame = 0.0
-        while True:
-            success, frame = self.cap.read()
-            if success:
-                t = time.time()
-                # only periodically store frames
-                if t - latest_frame >= 0.5:
-                    self.store_frame(t, frame)
-                    latest_frame = t
-            else:
-                time.sleep(0.01)
