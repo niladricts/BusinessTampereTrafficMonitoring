@@ -38,6 +38,7 @@ class StreamReader:
     def get_constants(self):
         return self.WIDTH, self.HEIGHT
 
+    @staticmethod
     def find_nearest(array, value):
         """
         Utility function for finding array element with closest value to value-parameter
@@ -58,6 +59,9 @@ class StreamReader:
             self.timestamps.popleft()
         self.cache[timestamp] = frame
         self.timestamps.append(timestamp)
+        
+    def get_frame(self, epoch_time):
+        return self.cache[self.find_nearest(self.timestamps, epoch_time)]
 
     def read_stream_to_buffer(self):
         while True:

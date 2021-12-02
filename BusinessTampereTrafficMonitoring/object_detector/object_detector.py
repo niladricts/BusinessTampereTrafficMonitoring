@@ -87,9 +87,9 @@ class ObjectDetector:
         # Count detected cars by lane
         # TODO: this can be optimized
         for point in points:
+            # point_inside() expects list of tuples, but vertices
+            # that are read from json are lists
             for lane in lanes:
-                # point_inside() expects list of tuples, but vertices
-                # that are read from json are lists
                 vertices = [tuple(xy) for xy in lane["vertices"]]
                 if point_inside(point, vertices):
                     lane["cars"] += 1
