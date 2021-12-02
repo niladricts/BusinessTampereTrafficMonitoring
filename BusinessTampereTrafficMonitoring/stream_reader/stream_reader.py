@@ -74,9 +74,9 @@ class StreamReader:
 
     def read_buffer_to_cache(self):
         while True:
-            t = time.time()
             try:
-                frame = self.buffer.get()
+                t = time.time()
+                frame = self.buffer.get(timeout=2, block=True)
             except queue.Empty:
                 logger.error("Unexpected error happened, reinitializing VideoCapture")
                 self.cap.release()
@@ -85,7 +85,7 @@ class StreamReader:
                     self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
                     time.sleep(1)
                     if time.time() - self.t_latest_frame > 5:
-                        logger.error("Couldn't recover. More info: " + str(queue.Empty))
+                        logger.error("Couldn't recover from lost stream.")
                         return -1
             if t - self.t_latest_frame >= 0.5:
                 self.t_latest_frame = t
