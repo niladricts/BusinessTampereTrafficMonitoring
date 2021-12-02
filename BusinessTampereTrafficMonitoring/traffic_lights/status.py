@@ -42,7 +42,8 @@ class Status(Enum):
 
         Detailed documentation:
         http://wiki.itsfactory.fi/images/f/fe/DINT_GRINT_states.pdf
-        Returns:Value(Int)
+        #Returns:
+         Value of the Status class variables RED, GREEN OR OTHER
 
         """
 

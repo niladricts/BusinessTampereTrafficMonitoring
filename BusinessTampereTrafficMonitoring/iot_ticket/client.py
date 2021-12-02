@@ -21,10 +21,10 @@ class Client(iotticket.client.Client):
 
         Required keyword arguments:
         ===========================
-        device_id:  Device ID for the camera (defined in IoT Ticket) (String)
-        lane:       Lane ID ("Data tag" name in IoT Ticket) (String)
-        count:      Number of cars on the lane at the given moment (Int)
-        timestamp:  Unix timestamp in seconds (when the cars were counted)(Float)
+        device_id:  Device ID for the camera (defined in IoT Ticket) (str)
+        lane:       Lane ID ("Data tag" name in IoT Ticket) (str)
+        count:      Number of cars on the lane at the given moment (int)
+        timestamp:  Unix timestamp in seconds (when the cars were counted)(float)
 
         Usage example:
         ==============

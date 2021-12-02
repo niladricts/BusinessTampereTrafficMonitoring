@@ -5,11 +5,11 @@ class SignalGroup:
     def __init__(self, device: str, name: str, timestamp: str, status_code: str):
         """
         Constructor to initialize the signal group
-        # Parameter:
-        # argument1: device id (String)
-        # argument2: device name (String)
-        # argument3: timestamp(String)
-        # argument4: status_code(String)
+        #Required Arguments:
+          device : device id (str)
+          device name : device name (str)
+          timestamp: timestamp(str)
+          status_code: one character string from traffic light API (str)
 
         """
 
@@ -23,11 +23,12 @@ class SignalGroup:
 
     def __create_event(self, timestamp):
         """
-
-        To create the traffic light cycle event # Parameter: # argument1: timestamp (TimeStamp)
-        # Returns: # Device
-        id (String), device name(string), red_light start time(TIMESTAMP), green_light start_time(TIMESTAMP),
-        timestamp
+        To create the traffic light cycle event
+        #Required Arguments:
+         timestamp:  traffic light event time stamp (str)
+        #Returns: Device
+          id (str), device name(str), red_light start time(str), green_light start_time(str),
+          timestamp(str) in a tuple format i.e., Tuple[str,str,str,str,str]
 
         """
 
@@ -47,11 +48,11 @@ class SignalGroup:
         event (RED to GREEN to RED) if one was completed
         as a result of the update.
         Otherwise returns None.
-        # Parameter:
-        # argument1: timestamp(String)
-        # argument2: status_code(String)
-        # Returns:
-        # Event (TrafficLightCycle)
+        #Required Arguments:
+          timestamp: timestamp for the traffic light event (str)
+          status_code: status_code from traffic light API (str)
+        #Returns:
+          Event in the format Tuple[str,str,str,str,str]
 
         """
         status = Status.decode(status_code)
@@ -79,4 +80,4 @@ class SignalGroup:
                 return event
             self.t_red_start = timestamp
             self.t_green_start = None
-            return None
+        return None

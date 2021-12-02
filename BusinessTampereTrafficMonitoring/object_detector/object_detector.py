@@ -23,11 +23,11 @@ def lower_center_from_bbox(bbox):
 def find_nearest(array, value):
     """
     Utility function for finding array element with closest value to value-parameter
-    #Required Parameter:
-      array: Array of values (Array)
-      value: value from which distance should be measured (Int)
+    #Required Arguments:
+      array: Array of values (numpy.typing.ArrayLike)
+      value: value from which distance should be measured (float)
     #Returns:
-     array[element]: Array element closest to value-parameter (Int)
+      value: Element of the array that is closest to value (float)
     """
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
@@ -82,6 +82,8 @@ class ObjectDetector:
     def get_frame(self, timestamp=None):
         """
         Find the frame for the given timestamp
+        #Returns:
+         Frame: numpy.ndarray
         """
         if timestamp is None:
             timestamp = time.time()
@@ -95,10 +97,10 @@ class ObjectDetector:
             Calls necessary utility functions to transform given parameters to usable formats.
             Does operations on the frames to extract vehicle counts per lane and stores the count, timestamp and lane.
         #Required arguments:
-         intersection: Intersection details
-         sgroup: Signal Group( Signal Group object)
-         epoch_time: Unix Epoch Time(Unix Timestamp)
-         light_status: Status of the green or red light (Int)
+          intersection: Intersection details (str) Example: "TRE401"
+          sgroup: Signal group(str)
+          epoch_time: Unix epoch time in seconds(float)
+          light_status: Status object from BusinessTampereTrafficMonitoring.traffic_lights.status.Status
         """
         print(f"[{datetime.fromtimestamp(epoch_time):%H:%M:%S}] light for {sgroup} changed to {light_status}")
         # light changes from red to green are not handled (yet)
@@ -158,12 +160,13 @@ class ObjectDetector:
         """
         Saves image from the video after detecting the objects
         #Required arguments:
-        # img: Image (Image)
-        # sgroup: Signal Group (Signal Group Object)
-        # vehicle_count: count of vehicles detected (Int)
-        # boxes: List of boxes with height and width (List[])
-        # points: List of points(List[Double,Double])
-        # timestamp: Timestamp (Unix Timestamp)
+          img: Image (numpy.ndarray)
+          sgroup: Signal group (str)
+          vehicle_count: count of vehicles detected (int)
+          boxes: List of boxes with four coordinates (List[])
+          points: List of points (List[Tuple[float, float]]). It only contains detections of the classes that we are
+        interested in.
+          timestamp: Epoch time in seconds (float)
         """
         directory = os.path.abspath("./frames")
         if not os.path.exists(directory):

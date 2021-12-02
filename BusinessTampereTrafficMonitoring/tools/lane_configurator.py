@@ -42,7 +42,7 @@ def read_args():
 
 def print_json(args, lanes, polygons):
     """
-    prints the result of intersection, camera_id, lane, vertices as a json
+    Outputs the lane configuration in JSON format
     #Required arguments:
       args: Dictionary of arguments(Dict)
       lanes : List of lanes (List)
@@ -60,9 +60,7 @@ def print_json(args, lanes, polygons):
 
 
 def main():
-    """
-    Main function to work with the input image
-    """
+
     args = read_args()
     lanes = args["lane"] or []
     scale = args["scale"] or 1
@@ -83,9 +81,6 @@ def main():
     infotxt = tk.StringVar()
 
     def update_infotxt():
-        """
-        called from main method. Helps in selecting points in the input image
-        """
         if lanes_given and polygon_index >= len(lanes):
             infotxt.set("All required lanes have been configured, you can close the window!")
         elif lanes_given:
@@ -106,11 +101,6 @@ def main():
     canvas.pack()
 
     def onclick(event):
-        """
-        Onclick event triggered upon clicking on the image
-        #Required arguments:
-          event : event that triggers the onclick
-        """
         x = event.x
         y = event.y
         points.append((x, y))

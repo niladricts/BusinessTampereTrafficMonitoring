@@ -9,13 +9,13 @@ COUNTERCLOCKWISE = 2
 
 def orientation(p1: Tuple[float, float], p2: Tuple[float, float], p3: Tuple[float, float]):
     """
-    Returns the orientation of the geometrical figure
-    # Required Arguments:
-      p1: Co-ordinate 1 (Tuple[float,float])
-      p2: Co-ordinate 2(Tuple[float,float])
-      p3: Co-ordinate 3(Tuple[float,float])
-    # Returns:
-      Orientation: COLINEAR=0, CLOCKWISE=1, COUNTERCLOCKWISE=2 (Int)
+    Returns the orientation of the three points
+    #Required Arguments:
+      p1: Coordinate 1 (Tuple[float,float])
+      p2: Coordinate 2(Tuple[float,float])
+      p3: Coordinate 3(Tuple[float,float])
+    #Returns:
+      Orientation (COLINEAR or CLOCKWISE or COUNTERCLOCKWISE)
     """
     value = (p2[1] - p1[1]) * (p3[0] - p2[0]) - (p2[0] - p1[0]) * (p3[1] - p2[1])
     if value < 0:
@@ -27,11 +27,11 @@ def orientation(p1: Tuple[float, float], p2: Tuple[float, float], p3: Tuple[floa
 
 
 def convex_hull(points: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
-    """Return convex hull of 2D points.
-    # Required arguments:
-      points: co-ordinates (List[Tuple[float,float]])
-    # Returns:
-      Co-ordinates (List[Tuple[float,float]])
+    """Returns convex hull of 2D points.
+    #Required Arguments:
+      points: coordinates (List[Tuple[float,float]])
+    #Returns:
+      coordinates (List[Tuple[float,float]])
     """
     # remove duplicates
     points = list(set(points))
@@ -69,10 +69,10 @@ def point_inside(point: Tuple[float, float], hull: List[Tuple[float, float]]):
     Returns True if a point is inside a convex hull, False otherwise.
     Points located exactly on the edge may return either.
     #Required Arguments:
-      point: Tuple of co-ordinates (Tuple[float,float])
-      hull : Tuple of co-ordinates (Tuple[float,float])
-    # Returns:
-      Boolean
+      point: Tuple of coordinates (Tuple[float,float])
+      hull : List of tuple of coordinates (List[Tuple[float,float]])
+    #Returns:
+      True (bool value) if points are inside a convex hull
     """
     points = hull + [point]
     return point not in convex_hull(points)

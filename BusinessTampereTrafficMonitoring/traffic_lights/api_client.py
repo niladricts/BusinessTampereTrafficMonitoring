@@ -31,10 +31,10 @@ class TrafficLightAPIClient:
         """
         Constructor for initializing TrafficLightAPIClient class
 
-        #Parameter:
-        # argument1: url (String)
-        # argument2: list of monitored devices List[string]
-        # argument3: database connection string (String)
+        #Required Arguments:
+          url: API end point (str) , Example: http://trafficlights.tampere.fi/api/v1/deviceState/
+          monitored_devices : list of intersections (List[str]), Example:  "TRE401", "TRE428".
+          db : database connection URL (str)
         """
 
         self.url = url
@@ -55,10 +55,10 @@ class TrafficLightAPIClient:
 
         Returns a list of events that were completed as a result
         of the update.
-        # Parameter:
-        # argument1: device name (String)
-        # Returns:
-        # Event (List[])
+        #Required Arguments:
+          device : device name (str)
+        #Returns:
+          empty list of events (List[])
         """
         resp = httpx.get(f"{self.url}{device}")
         if resp.status_code != httpx.codes.OK:
@@ -83,8 +83,8 @@ class TrafficLightAPIClient:
     def store(self, events: List):
         """
         Stores events into the database.
-        #Parameter:
-        # argument1: events (List[])
+        #Required Arguments:
+          events: list of events (List)
 
         """
         if len(events) < 1:
@@ -106,8 +106,8 @@ class TrafficLightAPIClient:
 
         This method never returns unless another thread calls stop_polling().
         It is intended to be called in a new thread.
-        # Parameter:
-        # argument1: interval (float)
+        #Required Arguments:
+          interval: Time interval between polling the API (float)
 
         """
         if interval <= 0:
@@ -129,9 +129,9 @@ class TrafficLightAPIClient:
 
         This method never returns unless another thread calls stop_polling().
         It is intended to be called in a new thread.
-        # Parameter:
-        # argument1: interval (float)
-        # argument2: callback function (Callable)
+        #Required Arguments:
+          interval: interval (float)
+          callback: callback function (Callable)
 
         """
         if interval <= 0:
@@ -160,18 +160,19 @@ class TrafficLightAPIClient:
                             callback(device, sgroup["name"], timestamp, new_status)
 
     def stop_polling(self):
-        """ To stop polling """
+        """ Stops polling the API after the current polling cycle is completed.
+        It may take up to interval seconds for the polling thread to finish."""
 
         if self.active:
             self.active = False
 
 
 def _parse_date(dstr):
-    """ Private method to parsing date in YYYY-MM-DD HH:MM:SSTZ format
-        #Parameter:
-        argument1: dstr(String)
+    """ Private method to parsing date in YYYY-MM-DDTHH:MM:SSTZ format
+        #Required Arguments:
+          dstr: dstr(String)
        #Returns:
-       DateTime (String)
+         DateTime (datetime.datetime)
 
     """
 
