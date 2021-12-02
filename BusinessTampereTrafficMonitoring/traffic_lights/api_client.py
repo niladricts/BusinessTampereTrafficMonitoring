@@ -29,14 +29,13 @@ class TrafficLightCycle(Base):
 class TrafficLightAPIClient:
     def __init__(self, url: str, monitored_devices: List[str], db: str):
         """
-        Constructor for initializing TrafficLightAPIClient class
+        Initializes TrafficLightAPIClient.
 
-        #Required Arguments:
-          url: API end point (str) , Example: http://trafficlights.tampere.fi/api/v1/deviceState/
-          monitored_devices : list of intersections (List[str]), Example:  "TRE401", "TRE428".
-          db : database connection URL (str)
+        # Parameters:
+          url: URL of the traffic light API end point (str), Example: "http://trafficlights.tampere.fi/api/v1/deviceState/"
+          monitored_devices: list of intersections (List[str]), Example: ["TRE401", "TRE428"]
+          db: database connection URL in SQL Alchemy format (str)
         """
-
         self.url = url
         self.monitored_devices = monitored_devices
         self.active = False
@@ -51,14 +50,13 @@ class TrafficLightAPIClient:
 
     def update_device_state(self, device: str):
         """
-        GETs the state of a device from the API.
+        GETs the state of a device from the API and returns a list of completed events.
 
-        Returns a list of events that were completed as a result
-        of the update.
-        #Required Arguments:
-          device : device name (str)
-        #Returns:
-          empty list of events (List[])
+        # Parameters:
+          device: device name (str)
+        # Returns:
+          List of traffic light cycle events that were completed as a result of
+          updating the device state. (List[Tuple[str,str,str,str,str]])
         """
         resp = httpx.get(f"{self.url}{device}")
         if resp.status_code != httpx.codes.OK:
@@ -82,10 +80,10 @@ class TrafficLightAPIClient:
 
     def store(self, events: List):
         """
-        Stores events into the database.
-        #Required Arguments:
-          events: list of events (List)
+        Stores traffic light cycle events into the database.
 
+        # Parameters:
+          events: list of events to be stored (List[Tuple[str,str,str,str,str]])
         """
         if len(events) < 1:
             return
@@ -106,9 +104,9 @@ class TrafficLightAPIClient:
 
         This method never returns unless another thread calls stop_polling().
         It is intended to be called in a new thread.
-        #Required Arguments:
-          interval: Time interval between polling the API (float)
 
+        # Parameters:
+          interval: The time to wait between polling the API (float)
         """
         if interval <= 0:
             raise ValueError("Polling interval has to be greater than zero")
@@ -129,10 +127,10 @@ class TrafficLightAPIClient:
 
         This method never returns unless another thread calls stop_polling().
         It is intended to be called in a new thread.
-        #Required Arguments:
-          interval: interval (float)
-          callback: callback function (Callable)
 
+        # Parameters:
+          interval: The time to wait between polling the API (float)
+          callback: callback function (Callable)
         """
         if interval <= 0:
             raise ValueError("Polling interval has to be greater than zero")
@@ -160,20 +158,13 @@ class TrafficLightAPIClient:
                             callback(device, sgroup["name"], timestamp, new_status)
 
     def stop_polling(self):
-        """ Stops polling the API after the current polling cycle is completed.
-        It may take up to interval seconds for the polling thread to finish."""
-
+        """
+        Stops polling the API after the current polling cycle is completed.
+        It may take up to interval seconds for the polling thread to finish.
+        """
         if self.active:
             self.active = False
 
 
 def _parse_date(dstr):
-    """ Private method to parsing date in YYYY-MM-DDTHH:MM:SSTZ format
-        #Required Arguments:
-          dstr: dstr(String)
-       #Returns:
-         DateTime (datetime.datetime)
-
-    """
-
     return datetime.strptime(dstr, "%Y-%m-%dT%H:%M:%S%z")

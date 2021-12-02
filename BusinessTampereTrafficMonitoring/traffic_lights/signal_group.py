@@ -5,14 +5,12 @@ class SignalGroup:
     def __init__(self, device: str, name: str, timestamp: str, status_code: str):
         """
         Constructor to initialize the signal group
-        #Required Arguments:
-          device : device id (str)
-          device name : device name (str)
-          timestamp: timestamp(str)
-          status_code: one character string from traffic light API (str)
-
+        # Parameters:
+          device: device (intersection) id, for example "TRE401" (str)
+          name: name of the signal group, for example "A" or "RV1" (str)
+          timestamp: timestamp as returned from the traffic light API (str)
+          status_code: One character string representing the initial state of the traffic light, as returned from the API (str)
         """
-
         self.device = device
         self.name = name
         self.t_red_start = None
@@ -23,15 +21,13 @@ class SignalGroup:
 
     def __create_event(self, timestamp):
         """
-        To create the traffic light cycle event
-        #Required Arguments:
-         timestamp:  traffic light event time stamp (str)
-        #Returns: Device
-          id (str), device name(str), red_light start time(str), green_light start_time(str),
-          timestamp(str) in a tuple format i.e., Tuple[str,str,str,str,str]
+        Creates a traffic light cycle event
 
+        # Parameters:
+          timestamp: Time when green light ended (str)
+        # Returns:
+          Traffic light cycle event (Tuple[str, str, str, str, str])
         """
-
         return (
             self.device,
             self.name,
@@ -42,18 +38,25 @@ class SignalGroup:
 
     def update_state(self, timestamp: str, status_code: str):
         """
-
         Updates the state of the signal group.
+
         Returns a tuple representing a traffic light cycle
         event (RED to GREEN to RED) if one was completed
-        as a result of the update.
-        Otherwise returns None.
-        #Required Arguments:
-          timestamp: timestamp for the traffic light event (str)
-          status_code: status_code from traffic light API (str)
-        #Returns:
-          Event in the format Tuple[str,str,str,str,str]
+        as a result of the update. Otherwise returns None.
 
+        The returned tuple consists of the following parts:
+          - device id (str)
+          - signal group name (str)
+          - red light start time (str)
+          - green light start time (str)
+          - green light end time (str)
+
+        # Parameters:
+          timestamp: timestamp for the traffic light event (str)
+          status_code:  from traffic light API (str)
+
+        # Returns:
+          Either None or Tuple[str, str, str, str, str]
         """
         status = Status.decode(status_code)
         if status == self.status:

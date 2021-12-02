@@ -42,11 +42,10 @@ class Status(Enum):
 
         Detailed documentation:
         http://wiki.itsfactory.fi/images/f/fe/DINT_GRINT_states.pdf
-        #Returns:
-         Value of the Status class variables RED, GREEN OR OTHER
-
+        
+        # Returns:
+          Either Status.RED, Status.GREEN, or Status.OTHER
         """
-
         if len(status_str) != 1 or status_str < '0' or status_str > 'J':
             raise ValueError(f"Invalid traffic light status code: '{status_str}'")
         if status_str in "?@ABCDEFGH90":  # includes amber after red

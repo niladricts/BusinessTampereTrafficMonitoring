@@ -43,10 +43,10 @@ def read_args():
 def print_json(args, lanes, polygons):
     """
     Outputs the lane configuration in JSON format
-    #Required arguments:
-      args: Dictionary of arguments(Dict)
+    # Parameters:
+      args: Dictionary of arguments (Dict)
       lanes : List of lanes (List)
-      polygons: List of polygons(List)
+      polygons: List of polygons (List)
     """
     arr = []
     for i, lane in enumerate(lanes):
@@ -60,7 +60,6 @@ def print_json(args, lanes, polygons):
 
 
 def main():
-
     args = read_args()
     lanes = args["lane"] or []
     scale = args["scale"] or 1
@@ -111,11 +110,6 @@ def main():
         update_infotxt()
 
     def finish_polygon(event):
-        """
-        Method for creating a polygon on the input image to get the region of interest.
-        #Required arguments:
-          event : Event of button click
-        """
         nonlocal polygon_index, points
         hull = geometry.convex_hull(points)
         kwargs = {"width": LINEWIDTH, "fill": COLORS[polygon_index % len(COLORS)]}
