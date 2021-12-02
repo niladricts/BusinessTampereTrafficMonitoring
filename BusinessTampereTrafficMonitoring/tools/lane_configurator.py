@@ -41,6 +41,13 @@ def read_args():
 
 
 def print_json(args, lanes, polygons):
+    """
+    Outputs the lane configuration in JSON format
+    # Parameters:
+      args: Dictionary of arguments (Dict)
+      lanes : List of lanes (List)
+      polygons: List of polygons (List)
+    """
     arr = []
     for i, lane in enumerate(lanes):
         obj = {}

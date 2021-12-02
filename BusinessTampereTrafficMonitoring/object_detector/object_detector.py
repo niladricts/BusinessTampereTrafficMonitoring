@@ -17,12 +17,18 @@ ALLOWED_CLASSES = [1, 2, 3, 5, 7]
 
 
 def lower_center_from_bbox(bbox):
-    return ((bbox[0]+bbox[2]) / 2, bbox[3])
+    return (bbox[0] + bbox[2]) / 2, bbox[3]
 
 
 def find_nearest(array, value):
     """
-    Utility function for finding array element with closest value to value-parameter
+    Utility function for finding array element with closest value to value-parameter.
+    Raises a ValueError exception if called with an empty array.
+    # Parameters:
+      array: Array of values (numpy.typing.ArrayLike)
+      value: Value from which distance should be measured (float)
+    # Returns:
+      Element of the array that is closest to value (float)
     """
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
@@ -64,9 +70,9 @@ class ObjectDetector:
     def store_frame(self, timestamp, frame):
         """
         Function for storing a time-stamp associated frame to cache
-        Inputs:
-            time: UNIX time stamp
-            frame: frame read using CV2, no operations done prior
+        # Parameters:
+          timestamp: Epoch time in seconds (float)
+          frame: frame read using CV2, no operations done prior
         """
         if len(self.timestamps) == 200:
             self.cache.pop(self.timestamps[0])
@@ -75,6 +81,14 @@ class ObjectDetector:
         self.timestamps.append(timestamp)
 
     def get_frame(self, timestamp=None):
+        """
+        Find the frame for a given timestamp.
+        If timestamp is not given, return the frame closest to current time.
+        # Parameters:
+          timestamp: Epoch time in seconds (float)
+        # Returns:
+          The frame as numpy.ndarray
+        """
         if timestamp is None:
             timestamp = time.time()
         return self.cache[find_nearest(self.timestamps, timestamp)]
@@ -86,6 +100,11 @@ class ObjectDetector:
             Matches the given parameters to specific frames.
             Calls necessary utility functions to transform given parameters to usable formats.
             Does operations on the frames to extract vehicle counts per lane and stores the count, timestamp and lane.
+        # Parameters:
+          intersection: Intersection id, for example "TRE401" (str)
+          sgroup: Signal group id, for example "A" or "RV1" (str)
+          epoch_time: Epoch time in seconds (float)
+          light_status: Current status of the traffic light (Status)
         """
         print(f"[{datetime.fromtimestamp(epoch_time):%H:%M:%S}] light for {sgroup} changed to {light_status}")
         # light changes from red to green are not handled (yet)
@@ -142,6 +161,16 @@ class ObjectDetector:
         self.save_image_for_debugging(frame_at_the_time, sgroup, vehicle_count, boxes, points, epoch_time)
 
     def save_image_for_debugging(self, img, sgroup, vehicle_count, boxes, detections, timestamp):
+        """
+        Draws detected objects in a frame and saves the image on disk.
+        # Parameters:
+          img: Numpy array representing the image (numpy.ndarray)
+          sgroup: Signal group id, for example "A" or "RV1" (str)
+          vehicle_count: Number of vehicles detected (int)
+          boxes: List of boxes with four coordinates (x0, y0, x1, y1) (List[float])
+          points: List of detections to be drawn in the image. (List[Tuple[float, float]])
+          timestamp: Epoch time in seconds (float)
+        """
         directory = os.path.abspath("./frames")
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -179,7 +208,8 @@ class ObjectDetector:
 
     def read_stream(self):
         """
-        Function for reading frames from the stream, runs all the time. Does no operations on the frames.
+        Reads frames from the stream into cache, runs all the time.
+        Does no operations on the frames.
         """
         latest_frame = 0.0
         while True:
