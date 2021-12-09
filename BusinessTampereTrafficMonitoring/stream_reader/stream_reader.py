@@ -11,7 +11,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-formatter = logging.Formatter('%(asctime)s:%(name)s:%message)s')
+formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
 
 file_handler = logging.FileHandler('stream_reader-log')
 file_handler.setFormatter(formatter)
