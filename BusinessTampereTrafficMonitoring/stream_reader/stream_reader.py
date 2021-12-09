@@ -64,7 +64,8 @@ class StreamReader:
     def get_frame(self, epoch_time=None):
         if epoch_time is None:
             epoch_time = time.time()
-        return self.cache[self.find_nearest(self.timestamps, epoch_time)]
+        copy = self.cache[self.find_nearest(self.timestamps, epoch_time)]
+        return copy
 
     def read_stream_to_buffer(self):
         while True:
