@@ -1,6 +1,5 @@
 import json
 import threading
-import time
 
 from BusinessTampereTrafficMonitoring.object_detector.object_detector import ObjectDetector
 from BusinessTampereTrafficMonitoring.traffic_lights.api_client import TrafficLightAPIClient
@@ -9,16 +8,17 @@ from BusinessTampereTrafficMonitoring.traffic_lights.api_client import TrafficLi
 with open("config.json", "r") as configfile:
     CONFIG = json.load(configfile)
 
+# Read monitored devices from config, get rid of duplicates
+monitored_devices = set(lane["intersection_id"] for lane in CONFIG["lanes"])
 
 traffic_light_client = TrafficLightAPIClient(
     url="http://trafficlights.tampere.fi/api/v1/deviceState/",
-    monitored_devices=["TRE401"],
+    monitored_devices=list(monitored_devices),
     db="sqlite:///:memory:",
 )
 
 object_detector = ObjectDetector(
-    # video_location="/home/mikko/koulujuduj/proj620/traffic.mp4",
-    video_location="rtsp://rtsp.kvt.tampere.fi:55489/proxyStream",
+    video_location=CONFIG["camera_url"],
     config=CONFIG
 )
 
@@ -37,6 +37,6 @@ light_watching = threading.Thread(
 )
 light_watching.start()
 
-
-time.sleep(60)
-print("Quitting..")
+# Stop the system when user presses enter
+input()
+print("Shutting down..")

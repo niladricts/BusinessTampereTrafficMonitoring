@@ -1,4 +1,5 @@
 {
+  "camera_url": "rtsp://rtsp.kvt.tampere.fi:55489/proxyStream",
   "lanes": [
     {
       "intersection_id": "TRE401",
