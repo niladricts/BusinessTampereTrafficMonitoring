@@ -86,6 +86,7 @@ class StreamReader:
                 if t - self.t_latest_frame >= 0.5:
                     self.t_latest_frame = t
                     self.store_frame(t, frame)
+                self.buffer.task_done()
             except queue.Empty:
                 logger.error("Unexpected error happened, reinitializing VideoCapture.")
                 self.cap.release()
@@ -98,7 +99,7 @@ class StreamReader:
                     if time.time() - self.t_latest_frame > 5:
                         logger.error("Couldn't recover from lost stream.")
                         return -1
-            self.buffer.task_done()
+
 
     def read_stream(self):
         generator = Thread(target=self.read_stream_to_buffer)
