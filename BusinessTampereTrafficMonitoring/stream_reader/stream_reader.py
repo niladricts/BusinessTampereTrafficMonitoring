@@ -1,6 +1,7 @@
 import logging
 import queue
 import time
+import sys
 from collections import deque
 from threading import Thread
 
@@ -11,11 +12,16 @@ import numpy as np
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(message)s')
+
+stream_handler = logging.StreamHandler(sys.stderr)
+stream_handler.setLevel(logging.ERROR)
+stream_handler.setFormatter(formatter)
 
 file_handler = logging.FileHandler('stream_reader-log')
 file_handler.setFormatter(formatter)
 
+logger.addHandler(stream_handler)
 logger.addHandler(file_handler)
 
 
@@ -77,19 +83,21 @@ class StreamReader:
             try:
                 t = time.time()
                 frame = self.buffer.get(timeout=2, block=True)
+                if t - self.t_latest_frame >= 0.5:
+                    self.t_latest_frame = t
+                    self.store_frame(t, frame)
             except queue.Empty:
-                logger.error("Unexpected error happened, reinitializing VideoCapture")
+                logger.error("Unexpected error happened, reinitializing VideoCapture.")
                 self.cap.release()
                 self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
                 while not self.cap.isOpened():
+                    logger.error("Reinitialization failed, trying again.")
+                    self.cap.release()
                     self.cap = cv2.VideoCapture(self.video_location, apiPreference=cv2.CAP_FFMPEG)
-                    time.sleep(1)
+                    time.sleep(0.5)
                     if time.time() - self.t_latest_frame > 5:
                         logger.error("Couldn't recover from lost stream.")
                         return -1
-            if t - self.t_latest_frame >= 0.5:
-                self.t_latest_frame = t
-                self.store_frame(t, frame)
             self.buffer.task_done()
 
     def read_stream(self):
