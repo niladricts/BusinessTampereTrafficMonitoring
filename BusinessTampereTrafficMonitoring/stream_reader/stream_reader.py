@@ -1,7 +1,7 @@
 import logging
 import queue
-import time
 import sys
+import time
 from collections import deque
 from threading import Thread
 
