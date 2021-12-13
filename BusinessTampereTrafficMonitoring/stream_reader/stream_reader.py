@@ -100,7 +100,6 @@ class StreamReader:
                         logger.error("Couldn't recover from lost stream.")
                         return -1
 
-
     def read_stream(self):
         generator = Thread(target=self.read_stream_to_buffer)
         consumer = Thread(target=self.read_buffer_to_cache)
