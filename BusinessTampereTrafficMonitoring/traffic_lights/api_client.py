@@ -137,7 +137,11 @@ class TrafficLightAPIClient:
         self.active = True
         while self.active:
             for device in self.monitored_devices:
-                resp = httpx.get(f"{self.url}{device}")
+                try:
+                    resp = httpx.get(f"{self.url}{device}")
+                except httpx.ReadError as e:
+                    print(f"[traffic_lights] Error fetching data from {self.url}{device}: {e}", flush=True)
+                    return
                 if resp.status_code != httpx.codes.OK:
                     print(f"[traffic_lights] Error fetching data: HTTP {resp.status_code}", flush=True)
                     return
