@@ -1,5 +1,6 @@
-import pytest
 import json
+
+import pytest
 
 from BusinessTampereTrafficMonitoring.object_detector.object_detector import ObjectDetector
 
