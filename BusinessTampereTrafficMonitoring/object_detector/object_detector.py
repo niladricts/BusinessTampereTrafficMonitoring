@@ -67,17 +67,18 @@ class ObjectDetector:
             return
 
         frame_at_the_time = self.stream_reader.get_frame(epoch_time)
-        points, boxes = self.detect(frame_at_the_time)
-        lanes = self.process_detections(points, lanes)
-        vehicle_count = self.post_detections(lanes, epoch_time)
+        points, boxes = self.detect(frame_at_the_time, self.model, self.WIDTH, self.HEIGHT)
+        lanes, vehicle_count = self.process_detections(points, lanes)
+        self.post_detections(lanes, epoch_time)
 
         # TODO: put this behind a flag or something
         self.save_image_for_debugging(frame_at_the_time, sgroup, vehicle_count, boxes, points, epoch_time)
 
-    def detect(self, frame):
+    @staticmethod
+    def detect(frame, model, width, height):
         prediction_frame = np.expand_dims(frame, axis=0) / 255.0
-        boxes, scores, classes, detections = self.model.predict(prediction_frame)
-        boxes = boxes[0] * [self.WIDTH, self.HEIGHT, self.WIDTH, self.HEIGHT]
+        boxes, scores, classes, detections = model.predict(prediction_frame)
+        boxes = boxes[0] * [width, height, width, height]
         scores = scores[0]
         classes = classes[0].astype(int)
         points = []
@@ -88,6 +89,7 @@ class ObjectDetector:
 
     @staticmethod
     def process_detections(points, lanes):
+        vehicle_count = 0
         for lane in lanes:
             lane["cars"] = 0
         # Count detected cars by lane
@@ -99,12 +101,12 @@ class ObjectDetector:
                 vertices = [tuple(xy) for xy in lane["vertices"]]
                 if point_inside(point, vertices):
                     lane["cars"] += 1
+                    vehicle_count += 1
                     break
-        return lanes
+        return lanes, vehicle_count
 
     @staticmethod
     def post_detections(lanes, epoch_time):
-        vehicle_count = 0
         for lane in lanes:
             lane_id = lane["lane"]
             cars = lane["cars"]
@@ -115,8 +117,6 @@ class ObjectDetector:
                 lane=lane_id,
                 count=cars,
                 timestamp=epoch_time)
-            vehicle_count += cars
-        return vehicle_count
 
     def save_image_for_debugging(self, img, sgroup, vehicle_count, boxes, detections, timestamp):
         """
