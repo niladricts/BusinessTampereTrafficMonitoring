@@ -6,7 +6,7 @@ import pytest
 from BusinessTampereTrafficMonitoring.stream_reader.stream_reader import StreamReader
 
 # Sample video from https://sample-videos.com
-SOURCE = "samples_for_tests/test.mp4"
+SOURCE = "tests/samples_for_tests/test.mp4"
 
 
 @pytest.mark.parametrize("source", list("01345678:"))
