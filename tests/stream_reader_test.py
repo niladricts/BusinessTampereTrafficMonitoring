@@ -1,7 +1,9 @@
-from BusinessTampereTrafficMonitoring.stream_reader.stream_reader import StreamReader
-import pytest
 import time
+
 import numpy as np
+import pytest
+
+from BusinessTampereTrafficMonitoring.stream_reader.stream_reader import StreamReader
 
 # Sample video from https://sample-videos.com
 SOURCE = "samples_for_tests/test_video.mp4"
@@ -52,4 +54,3 @@ def test_store_frame_get_frame():
     assert len(sr.cache) == 1
     assert len(sr.timestamps) == 1
     assert (sr.get_frame() == dummy_frame).all()
-
