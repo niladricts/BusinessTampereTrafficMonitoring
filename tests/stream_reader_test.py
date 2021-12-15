@@ -6,7 +6,7 @@ import pytest
 from BusinessTampereTrafficMonitoring.stream_reader.stream_reader import StreamReader
 
 # Sample video from https://sample-videos.com
-SOURCE = "samples_for_tests/test_video.mp4"
+SOURCE = "samples_for_tests/test.mp4"
 
 
 @pytest.mark.parametrize("source", list("01345678:"))
@@ -22,7 +22,7 @@ def test_init_class_with_valid_source():
 
 def test_get_constants():
     sr = StreamReader(SOURCE)
-    assert sr.get_constants() == (320, 240)
+    assert sr.get_constants() == (320, 160)
 
 
 def test_find_nearest_valid_input():
