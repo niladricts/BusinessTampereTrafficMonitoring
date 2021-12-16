@@ -9,10 +9,9 @@ from BusinessTampereTrafficMonitoring.stream_reader.stream_reader import StreamR
 SOURCE = "tests/samples_for_tests/test.mp4"
 
 
-@pytest.mark.parametrize("source", list("01345678:"))
-def test_init_class_with_invalid_source(source):
+def test_init_class_with_invalid_source():
     with pytest.raises(IOError):
-        StreamReader(source)
+        StreamReader(':')
 
 
 def test_init_class_with_valid_source():
