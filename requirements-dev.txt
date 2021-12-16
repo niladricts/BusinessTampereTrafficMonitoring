@@ -1,0 +1,8 @@
+bandit
+dlint
+flake8
+flake8-bugbear
+pre-commit
+pylint
+pytest
+tox
